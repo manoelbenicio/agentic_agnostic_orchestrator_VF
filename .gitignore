@@ -1,43 +1,9 @@
-# Dependencies
-node_modules/
-.venv/
-__pycache__/
-*.pyc
-
-# Build artifacts
-web/.next/
-web/.next/standalone/
-*.egg-info/
-dist/
-build/
-
-# Environment
+__pycache__
 .env
-.env.local
-.env.*.local
-
-# Logs
-*.log
-ops/logs/
-
-# Runtime
-ops/runtime/
-ops/run/
-ops/squad-tasks.tmp
-
-# IDE
-.vscode/
-.idea/
-
-# OS
+node_modules
+dist
+.pytest_cache
+*.pyc
 .DS_Store
-Thumbs.db
-
-# Pentest reports (sensitive)
-ops/pentest-reports/
-
-# Agent internals
-.agent/
-.gemini/
-.github/
-agnostic-ai-platform/.github/
+.idea
+.vscode
