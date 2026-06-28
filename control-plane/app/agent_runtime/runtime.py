@@ -192,6 +192,7 @@ class AgentResponse(BaseModel):
     agents: list[dict[str, Any]] | None = None
     message: dict[str, Any] | None = None
     stopped: bool | None = None
+    agent_id: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -411,7 +412,7 @@ def build_agent_runtime_router(runtime: AgentRuntime | None = None) -> APIRouter
             stopped = _rt().stop_agent(agent_id, reason=reason)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail={"code": "agent_not_found", "agent_id": agent_id}) from exc
-        return AgentResponse(stopped=stopped, agent_id=agent_id)  # type: ignore[arg-type]
+        return AgentResponse(stopped=stopped, agent_id=agent_id)
 
     @router.post("/{agent_id}/messages", response_model=AgentResponse)
     def send_message(

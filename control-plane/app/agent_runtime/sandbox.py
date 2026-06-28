@@ -245,6 +245,7 @@ class AgentSandbox:
         error: str | None = None
         duration = 0.0
         child_pid: int | None = proc.pid
+        exit_code: int = -1
 
         try:
             proc.join(timeout=self._limits.timeout_s)
@@ -257,6 +258,9 @@ class AgentSandbox:
                     proc.kill()
                     proc.join(0.5)
 
+            # Capture exit code BEFORE close() — closed processes raise on access.
+            exit_code = proc.exitcode if proc.exitcode is not None else -1
+
             # Drain the queue (non-blocking) for any output the child managed to publish.
             stdout_text, stderr_text, payload = self._drain_queue(out_q)
             if payload is not None:
@@ -264,9 +268,9 @@ class AgentSandbox:
 
             # Negative exit codes on POSIX indicate termination by signal.
             # SIGXCPU (-24) means CPU limit hit; SIGKILL (-9) is our hard kill.
-            if proc.exitcode is not None and proc.exitcode < 0:
+            if exit_code is not None and exit_code < 0:
                 try:
-                    signum = -proc.exitcode
+                    signum = -exit_code
                 except TypeError:
                     signum = 0
                 if signum == 24:  # SIGXCPU
@@ -279,13 +283,17 @@ class AgentSandbox:
             if proc.is_alive():
                 proc.kill()
                 proc.join(0.5)
-            proc.close() if hasattr(proc, "close") else None
+            if hasattr(proc, "close"):
+                try:
+                    proc.close()
+                except Exception:
+                    pass
 
         wall = time.monotonic() - start
         return self._build_result(
             stdout=stdout_text,
             stderr=stderr_text,
-            exit_code=proc.exitcode if proc.exitcode is not None else -1,
+            exit_code=exit_code,
             timed_out=timed_out,
             resource_exceeded=resource_exceeded,
             result=result if result is not _SANDBOX_SENTINEL else None,
