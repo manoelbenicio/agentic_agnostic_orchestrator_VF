@@ -8,7 +8,7 @@ logger = logging.getLogger("registry.adapters.ollama")
 class OllamaAdapter:
     """
     Adapter for interacting with a local Ollama instance exposing the REST API.
-    Implicitly conforms to the BaseAdapter integration contract.
+    Implicitly conforms to the BaseAdapter integration contract for the AOP ecosystem.
     """
     
     def __init__(self, base_url: str = "http://localhost:11434"):
@@ -42,7 +42,6 @@ class OllamaAdapter:
                 return models
         except Exception as e:
             logger.error(f"Failed to list Ollama models: {e}")
-            # Depending on strictness, we return an empty list or raise.
             return []
 
     async def complete(self, model: str, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -58,20 +57,16 @@ class OllamaAdapter:
         
         async with httpx.AsyncClient(timeout=120.0) as client:
             response = await client.post(url, json=payload)
-            
-            # Catch invalid/un-downloaded models early to satisfy harness requirements
             if response.status_code == 404:
                 raise ValueError(f"Model not found in local Ollama registry: {model}")
-                
-            response.raise_for_status()
             
-            data = response.json()
-            return data
+            response.raise_for_status()
+            return response.json()
 
     async def stream(self, model: str, messages: List[Dict[str, Any]]) -> AsyncGenerator[str, None]:
         """
         Executes a streaming completion request, parsing the JSONLines response format
-        from Ollama and yielding text delta chunks as they arrive.
+        from Ollama and yielding text delta chunks as they arrive asynchronously.
         """
         url = f"{self.base_url}/api/chat"
         payload = {
@@ -87,7 +82,7 @@ class OllamaAdapter:
                     
                 response.raise_for_status()
                 
-                # Ollama streams back NDJSON (Newline Delimited JSON)
+                # Unpack NDJSON (Newline Delimited JSON) streams
                 async for chunk in response.aiter_lines():
                     if chunk:
                         try:
