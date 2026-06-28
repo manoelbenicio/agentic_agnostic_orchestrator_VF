@@ -1,0 +1,209 @@
+name: AOP CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aop-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend Python
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: aop_ci
+          POSTGRES_PASSWORD: aop_ci_password
+          POSTGRES_DB: aop_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U aop_ci -d aop_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://aop_ci:aop_ci_password@127.0.0.1:5432/aop_ci
+      REDIS_URL: redis://127.0.0.1:6379/0
+      HERDR_SOCKET_PATH: /tmp/aop-ci-no-herdr.sock
+      HERDMASTER_URL: http://127.0.0.1:8080
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+
+      - name: Create CI deploy environment
+        run: |
+          cat > deploy/.env <<'EOF'
+          POSTGRES_USER=aop_ci
+          POSTGRES_PASSWORD=aop_ci_password
+          POSTGRES_DB=aop_ci
+          POSTGRES_PORT=5432
+          REDIS_PASSWORD=
+          REDIS_PORT=6379
+          AOP_API_PORT=8090
+          EOF
+
+      - name: Install backend
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e "./control-plane[dev]"
+
+      - name: Compile backend modules
+        run: python -m compileall -q control-plane
+
+      - name: Run backend unit tests
+        run: |
+          python -m pytest -q \
+            control-plane/ai_runtime/tests \
+            control-plane/app/tests \
+            control-plane/core/tests \
+            control-plane/coupling/tests \
+            control-plane/finops/tests \
+            control-plane/inbox_api/tests \
+            control-plane/issues_api/tests \
+            control-plane/llm_gateway/tests \
+            control-plane/messaging/tests \
+            control-plane/projects_api/tests \
+            control-plane/rag_pipeline/tests \
+            control-plane/settings_api/tests \
+            control-plane/squad_api/tests \
+            control-plane/tasks_api/tests \
+            control-plane/topology/tests \
+            control-plane/tracing/tests
+
+  frontend:
+    name: Frontend Next.js
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: web
+    env:
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:8090
+      NEXT_PUBLIC_GRAFANA_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_ALERTMANAGER_URL: http://127.0.0.1:9093
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Lint frontend
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
+  configs:
+    name: Configs and Contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install config validators
+        run: python -m pip install --upgrade pip pyyaml
+
+      - name: Validate JSON and YAML
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          import yaml
+
+          json_paths = [
+              Path("ops/squad-tasks.json"),
+              Path("docs/30-COMPONENTES/openapi.json"),
+              Path("web/package.json"),
+              Path("web/package-lock.json"),
+          ]
+          yaml_paths = [
+              Path(".github/workflows/ci.yml"),
+              Path("deploy/docker-compose.yml"),
+              Path("openspec/config.yaml"),
+          ]
+          for path in json_paths:
+              json.loads(path.read_text(encoding="utf-8"))
+              print(f"JSON OK {path}")
+          for path in yaml_paths:
+              yaml.safe_load(path.read_text(encoding="utf-8"))
+              print(f"YAML OK {path}")
+          PY
+
+      - name: Validate shell scripts
+        run: |
+          bash -n ops/common.sh
+          bash -n ops/start.sh
+          bash -n ops/stop.sh
+          bash -n ops/db-backup.sh
+          bash -n ops/db-restore.sh
+          bash -n ops/install-backup-cron.sh
+          bash -n e2e/k6/run-k6.sh
+
+      - name: Validate Docker Compose
+        env:
+          POSTGRES_USER: aop_ci
+          POSTGRES_PASSWORD: aop_ci_password
+          POSTGRES_DB: aop_ci
+          REDIS_PASSWORD: aop_ci_redis_password
+          POSTGRES_PORT: "5432"
+          REDIS_PORT: "6379"
+        run: docker compose -f deploy/docker-compose.yml config --quiet
+
+      - name: Validate Terraform CDN
+        run: |
+          terraform -chdir=infra/terraform/cdn fmt -check -recursive
+          terraform -chdir=infra/terraform/cdn init -backend=false
+          terraform -chdir=infra/terraform/cdn validate

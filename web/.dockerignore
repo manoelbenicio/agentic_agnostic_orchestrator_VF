@@ -1,0 +1,10 @@
+node_modules
+.next
+test-results
+playwright-report
+coverage
+.env*
+npm-debug.log*
+*.tsbuildinfo
+Dockerfile
+.dockerignore

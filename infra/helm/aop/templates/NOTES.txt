@@ -1,0 +1,29 @@
+AOP platform has been deployed.
+
+Release: {{ .Release.Name }}
+Namespace: {{ include "aop.namespace" . }}
+
+{{- if .Values.ingress.enabled }}
+
+Ingress is enabled. Access the platform at:
+{{- range .Values.ingress.hosts }}
+  https://{{ .host }}
+{{- end }}
+
+{{- else }}
+
+To access the services, port-forward:
+  kubectl port-forward svc/{{ include "aop.fullname" . }}-nginx 8000:8000 -n {{ include "aop.namespace" . }}
+  kubectl port-forward svc/{{ include "aop.fullname" . }}-web 13000:13000 -n {{ include "aop.namespace" . }}
+{{- end }}
+
+Check deployment status:
+  kubectl get pods -n {{ include "aop.namespace" . }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+Verify the control-plane health:
+  kubectl exec -it deploy/{{ include "aop.fullname" . }}-control-plane -n {{ include "aop.namespace" . }} -- curl -s http://127.0.0.1:8090/health
+
+Review logs:
+  kubectl logs -n {{ include "aop.namespace" . }} -l app.kubernetes.io/instance={{ .Release.Name }} --tail=100
+
+See docs/10-DEPLOY/18-K8S-MULTI-REGIAO.md for full architecture and rollback procedures.
