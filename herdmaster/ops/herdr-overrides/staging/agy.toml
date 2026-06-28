@@ -1,0 +1,65 @@
+# LOCAL OVERRIDE for Herdr agent detection — agent "agy" (Antigravity/Google/Gemini)
+# Installed to: ~/.config/herdr/agent-detection/agy.toml
+# REPLACE semantics: this file fully replaces the bundled/remote agy manifest, so it
+# MUST contain the complete existing ruleset PLUS our additions.
+#
+# Base: remote agy.toml version 2026.06.24.1 (captured 2026-06-26 from
+#   ~/.local/state/herdr/agent-detection/remote/agy.toml — rules copied verbatim).
+# Addition: rule `ready_prompt_idle` (state=idle) — the upstream manifest defines only
+#   working+blocked rules, so an idle AGY prompt matched nothing and fell back to
+#   default_known_agent_idle_fallback. This rule closes that gap.
+# Bumped version last-segment to 99 to mark this as a local fork.
+# NOTE: Herdr requires `version` to be DOTTED NUMERIC (e.g. 2026.06.24.99) —
+# a suffix like "-local.1" is rejected ("version must be dotted numeric"). This
+# was discovered at install time; tomllib does not catch it (Herdr-specific).
+id = "agy"
+version = "2026.06.24.99"
+min_engine_version = 1
+updated_at = "2026-06-26T00:00:00Z"
+aliases = ["antigravity", "antigravity-cli"]
+
+# ── EXISTING RULES (verbatim from remote 2026.06.24.1) ──────────────────────────
+[[rules]]
+id = "permission_prompt"
+state = "blocked"
+priority = 300
+region = "whole_recent"
+visible_blocker = true
+contains = ["requesting permission for:"]
+any = [
+  { contains = ["do you want to proceed?"] },
+  { contains = ["tab amend", "edit command"] },
+]
+
+[[rules]]
+id = "spinner_working"
+state = "working"
+priority = 100
+region = "whole_recent"
+visible_working = true
+line_regex = ['^\s*[\u2800-\u28FF]+\s+\p{Alphabetic}+\w*ing\b']
+
+[[rules]]
+id = "background_tasks_working"
+state = "working"
+priority = 90
+region = "bottom_non_empty_lines(5)"
+visible_working = true
+line_regex = ['(?i)·\s*[1-9][0-9]*\s+task']
+
+# ── LOCAL ADDITION: idle detection (low priority so working/blocked win) ────────
+# Signature captured live 2026-06-26 from w8:pJ and w8:pY: the ready prompt always
+# shows the footer "? for shortcuts". Low priority (50) means the working (90/100)
+# and blocked (300) rules above always outrank this if they match, so even if the
+# footer persisted during work the state would still resolve correctly.
+[[rules]]
+id = "ready_prompt_idle"
+state = "idle"
+priority = 50
+region = "whole_recent"
+visible_idle = true
+contains = ["? for shortcuts"]
+not = [
+  { line_regex = ['^\s*[\u2800-\u28FF]+\s+\p{Alphabetic}+\w*ing\b'] },
+  { contains = ["requesting permission for:"] },
+]

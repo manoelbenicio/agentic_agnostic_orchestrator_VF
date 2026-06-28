@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HerdMaster Architecture - Micro</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070a0f;
+      --panel: #101722;
+      --panel-2: #141f2f;
+      --text: #edf4ff;
+      --muted: #91a4bb;
+      --line: #2e4056;
+      --bus: #4aa3ff;
+      --watchdog: #ff5c7a;
+      --dispatch: #36d399;
+      --project: #f8c14a;
+      --acl: #c084fc;
+      --api: #22d3ee;
+      --db: #f97316;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        linear-gradient(120deg, rgba(34, 211, 238, .08), transparent 34%),
+        radial-gradient(circle at 70% 10%, rgba(248, 193, 74, .13), transparent 26%),
+        #070a0f;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header { padding: 24px clamp(18px, 4vw, 48px) 14px; border-bottom: 1px solid rgba(145,164,187,.18); }
+    h1 { margin: 0; font-size: clamp(26px, 4vw, 46px); letter-spacing: 0; }
+    .subtitle { color: var(--muted); max-width: 1060px; line-height: 1.55; margin: 10px 0 0; }
+    main { padding: 18px clamp(14px, 3vw, 34px) 34px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .card {
+      background: linear-gradient(180deg, rgba(20,31,47,.94), rgba(10,15,22,.96));
+      border: 1px solid rgba(145,164,187,.18);
+      border-radius: 8px;
+      min-height: 360px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,.32);
+    }
+    .wide { grid-column: 1 / -1; }
+    .card h2 { margin: 0; padding: 16px 18px 4px; font-size: 21px; }
+    .card p { margin: 0; padding: 0 18px 12px; color: var(--muted); line-height: 1.45; }
+    svg { width: 100%; height: 278px; display: block; }
+    .wide svg { height: 360px; }
+    .box { fill: rgba(16,23,34,.94); stroke-width: 2; rx: 10; filter: drop-shadow(0 8px 16px rgba(0,0,0,.28)); }
+    .bus .box { stroke: var(--bus); }
+    .dispatch .box { stroke: var(--dispatch); }
+    .watchdog .box { stroke: var(--watchdog); }
+    .project .box { stroke: var(--project); }
+    .acl .box { stroke: var(--acl); }
+    .api .box { stroke: var(--api); }
+    .db .box { stroke: var(--db); }
+    .label { fill: var(--text); font-size: 13px; font-weight: 800; }
+    .small { fill: var(--muted); font-size: 10.5px; }
+    .flow { fill: none; stroke-width: 2.2; stroke-dasharray: 7 9; stroke-linecap: round; animation: move 1.3s linear infinite; }
+    @keyframes move { to { stroke-dashoffset: -32; } }
+    .beat { animation: beat 2.2s ease-in-out infinite; transform-origin: center; }
+    @keyframes beat { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+    .task {
+      animation: glide 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(54,211,153,.7));
+    }
+    @keyframes glide { 0% { transform: translateX(0); opacity: .35; } 18%,70% { opacity: 1; } 100% { transform: translateX(420px); opacity: .25; } }
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      padding: 0 18px 18px;
+    }
+    .note {
+      border: 1px solid rgba(145,164,187,.16);
+      background: rgba(255,255,255,.03);
+      border-radius: 8px;
+      padding: 10px;
+      color: #cbd8ea;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .note strong { color: var(--text); display: block; margin-bottom: 4px; }
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .notes { grid-template-columns: 1fr; }
+      .wide svg { height: 470px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HerdMaster Micro Architecture</h1>
+    <p class="subtitle">Component internals mapped to committed modules. Each panel shows the active runtime path and background asyncio tasks that keep the control plane moving.</p>
+  </header>
+  <main>
+    <section class="grid">
+      <article class="card bus">
+        <h2>Message Bus Internals</h2>
+        <p><code>bus.messages</code> defines typed JSON-RPC messages; <code>bus.server</code> hosts the asyncio Unix-socket broker with queues, persistence, TTL sweep, and file fallback.</p>
+        <svg viewBox="0 0 620 278">
+          <defs><marker id="a1" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#4aa3ff"></path></marker></defs>
+          <path class="flow" stroke="#4aa3ff" marker-end="url(#a1)" d="M106 96 H216"></path>
+          <path class="flow" stroke="#4aa3ff" marker-end="url(#a1)" d="M324 96 H432"></path>
+          <path class="flow" stroke="#f97316" marker-end="url(#a1)" d="M496 132 C496 170 438 182 374 188"></path>
+          <path class="flow" stroke="#4aa3ff" marker-end="url(#a1)" d="M310 132 C300 184 234 206 150 208"></path>
+          <rect class="box" x="28" y="60" width="132" height="72"></rect><text class="label" x="50" y="90">Unix socket</text><text class="small" x="50" y="112">newline JSON</text>
+          <rect class="box" x="216" y="60" width="132" height="72"></rect><text class="label" x="238" y="90">JSON-RPC</text><text class="small" x="238" y="112">Message.from_json</text>
+          <rect class="box" x="432" y="60" width="142" height="72"></rect><text class="label" x="454" y="90">Pub/Sub</text><text class="small" x="454" y="112">unicast/group/all</text>
+          <rect class="box" x="310" y="166" width="150" height="72"></rect><text class="label" x="332" y="196">SQLite audit</text><text class="small" x="332" y="218">MessageRepo.insert</text>
+          <rect class="box" x="60" y="174" width="150" height="72"></rect><text class="label" x="82" y="204">File fallback</text><text class="small" x="82" y="226">*.fallback JSONL</text>
+          <circle class="beat" cx="514" cy="172" r="8" fill="#4aa3ff"></circle><text class="small" x="528" y="176">TTL sweep task</text>
+        </svg>
+      </article>
+
+      <article class="card dispatch">
+        <h2>Queue + Dispatch Internals</h2>
+        <p><code>TaskQueue</code> orders ready work and claims with SQLite CAS; <code>DispatchInjector</code> resolves panes, waits idle, sends chunks, or writes prompt files for long payloads.</p>
+        <svg viewBox="0 0 620 278">
+          <defs><marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#36d399"></path></marker></defs>
+          <path class="flow" stroke="#36d399" marker-end="url(#a2)" d="M132 96 H218"></path>
+          <path class="flow" stroke="#36d399" marker-end="url(#a2)" d="M340 96 H432"></path>
+          <path class="flow" stroke="#36d399" marker-end="url(#a2)" d="M498 132 C498 164 430 184 364 188"></path>
+          <path class="flow" stroke="#f97316" marker-end="url(#a2)" d="M278 132 C276 164 254 184 222 196"></path>
+          <circle class="task" cx="52" cy="146" r="7" fill="#36d399"></circle>
+          <rect class="box" x="36" y="60" width="130" height="72"></rect><text class="label" x="58" y="90">ready_tasks</text><text class="small" x="58" y="112">priority + deps</text>
+          <rect class="box" x="218" y="60" width="136" height="72"></rect><text class="label" x="240" y="90">CAS claim</text><text class="small" x="240" y="112">version guard</text>
+          <rect class="box" x="432" y="60" width="144" height="72"></rect><text class="label" x="454" y="90">Idle gate</text><text class="small" x="454" y="112">agent_wait</text>
+          <rect class="box" x="314" y="172" width="154" height="72"></rect><text class="label" x="336" y="202">pane.send_text</text><text class="small" x="336" y="224">chunked keystrokes</text>
+          <rect class="box" x="76" y="172" width="156" height="72"></rect><text class="label" x="98" y="202">Prompt file</text><text class="small" x="98" y="224">large payload fallback</text>
+        </svg>
+      </article>
+
+      <article class="card watchdog">
+        <h2>Watchdog + Recovery Internals</h2>
+        <p><code>WatchdogEngine</code> combines primary events, secondary polling, and tertiary output hashes. <code>RecoveryManager</code> interrupts, respawns, replays, and escalates.</p>
+        <svg viewBox="0 0 620 278">
+          <defs><marker id="a3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#ff5c7a"></path></marker></defs>
+          <path class="flow" stroke="#ff5c7a" marker-end="url(#a3)" d="M154 94 H240"></path>
+          <path class="flow" stroke="#ff5c7a" marker-end="url(#a3)" d="M356 94 H438"></path>
+          <path class="flow" stroke="#ff5c7a" marker-end="url(#a3)" d="M508 132 C500 164 462 184 408 194"></path>
+          <path class="flow" stroke="#4aa3ff" marker-end="url(#a3)" d="M314 132 C306 166 278 190 232 204"></path>
+          <rect class="box" x="36" y="58" width="146" height="74"></rect><text class="label" x="58" y="88">Primary</text><text class="small" x="58" y="110">state-change stream</text>
+          <rect class="box" x="240" y="58" width="146" height="74"></rect><text class="label" x="262" y="88">Secondary</text><text class="small" x="262" y="110">agent list + pane read</text>
+          <rect class="box" x="438" y="58" width="146" height="74"></rect><text class="label" x="460" y="88">Tertiary</text><text class="small" x="460" y="110">output_hash diff</text>
+          <rect class="box" x="318" y="176" width="160" height="74"></rect><text class="label" x="340" y="206">Recovery</text><text class="small" x="340" y="228">\x03 interrupt / replay</text>
+          <rect class="box" x="86" y="176" width="160" height="74"></rect><text class="label" x="108" y="206">Escalation</text><text class="small" x="108" y="228">alert message</text>
+          <circle class="beat" cx="512" cy="202" r="8" fill="#ff5c7a"></circle><text class="small" x="526" y="206">health_events</text>
+        </svg>
+      </article>
+
+      <article class="card project">
+        <h2>Project Mode Internals</h2>
+        <p><code>ProjectPlanner</code>, <code>SquadRecommender</code>, and <code>EtaEstimator</code> turn one scope into a reviewed project plan and concrete queue tasks.</p>
+        <svg viewBox="0 0 620 278">
+          <defs><marker id="a4" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#f8c14a"></path></marker></defs>
+          <path class="flow" stroke="#f8c14a" marker-end="url(#a4)" d="M132 96 H220"></path>
+          <path class="flow" stroke="#f8c14a" marker-end="url(#a4)" d="M340 96 H434"></path>
+          <path class="flow" stroke="#f8c14a" marker-end="url(#a4)" d="M508 132 C508 166 466 188 404 202"></path>
+          <path class="flow" stroke="#36d399" marker-end="url(#a4)" d="M318 208 H214"></path>
+          <rect class="box" x="36" y="60" width="130" height="72"></rect><text class="label" x="58" y="90">Scope intake</text><text class="small" x="58" y="112">POST /projects</text>
+          <rect class="box" x="220" y="60" width="136" height="72"></rect><text class="label" x="242" y="90">Analysis</text><text class="small" x="242" y="112">A1 pane prompt</text>
+          <rect class="box" x="434" y="60" width="144" height="72"></rect><text class="label" x="456" y="90">Squad + ETA</text><text class="small" x="456" y="112">recommend + estimate</text>
+          <rect class="box" x="314" y="172" width="154" height="72"></rect><text class="label" x="336" y="202">Approval</text><text class="small" x="336" y="224">accept / modify</text>
+          <rect class="box" x="76" y="172" width="156" height="72"></rect><text class="label" x="98" y="202">Decompose</text><text class="small" x="98" y="224">enqueue child tasks</text>
+        </svg>
+      </article>
+
+      <article class="card acl">
+        <h2>ACL Engine Internals</h2>
+        <p>Configuration is parsed into roles, wildcard mappings, target-role resolution, and enforcement checks for Control API message routes and bus sends.</p>
+        <svg viewBox="0 0 620 278">
+          <defs><marker id="a5" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#c084fc"></path></marker></defs>
+          <path class="flow" stroke="#c084fc" marker-end="url(#a5)" d="M140 96 H232"></path>
+          <path class="flow" stroke="#c084fc" marker-end="url(#a5)" d="M356 96 H440"></path>
+          <path class="flow" stroke="#c084fc" marker-end="url(#a5)" d="M510 132 C510 166 468 188 402 202"></path>
+          <rect class="box" x="42" y="60" width="136" height="72"></rect><text class="label" x="64" y="90">Policy loader</text><text class="small" x="64" y="112">AclConfig roles</text>
+          <rect class="box" x="232" y="60" width="146" height="72"></rect><text class="label" x="254" y="90">Role map</text><text class="small" x="254" y="112">agent patterns</text>
+          <rect class="box" x="440" y="60" width="138" height="72"></rect><text class="label" x="462" y="90">Evaluator</text><text class="small" x="462" y="112">send/receive rules</text>
+          <rect class="box" x="312" y="172" width="160" height="72"></rect><text class="label" x="334" y="202">Enforcement</text><text class="small" x="334" y="224">AclDenied on block</text>
+          <circle class="beat" cx="154" cy="208" r="8" fill="#c084fc"></circle><text class="small" x="170" y="212">swap_config hot reload</text>
+        </svg>
+      </article>
+
+      <article class="card api">
+        <h2>Control API + CLI Internals</h2>
+        <p><code>herdmaster.cli</code> is the composition root; <code>ControlApiServer</code> is the local API router over Unix socket and optional token-protected localhost HTTP.</p>
+        <svg viewBox="0 0 620 278">
+          <defs><marker id="a6" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#22d3ee"></path></marker></defs>
+          <path class="flow" stroke="#22d3ee" marker-end="url(#a6)" d="M138 96 H224"></path>
+          <path class="flow" stroke="#22d3ee" marker-end="url(#a6)" d="M346 96 H434"></path>
+          <path class="flow" stroke="#f97316" marker-end="url(#a6)" d="M508 132 C498 168 460 188 402 202"></path>
+          <rect class="box" x="40" y="60" width="136" height="72"></rect><text class="label" x="62" y="90">Typer CLI</text><text class="small" x="62" y="112">start/status/tasks</text>
+          <rect class="box" x="224" y="60" width="146" height="72"></rect><text class="label" x="246" y="90">Socket client</text><text class="small" x="246" y="112">method/path/body</text>
+          <rect class="box" x="434" y="60" width="144" height="72"></rect><text class="label" x="456" y="90">Route dispatch</text><text class="small" x="456" y="112">projects/tasks/agents</text>
+          <rect class="box" x="312" y="172" width="160" height="72"></rect><text class="label" x="334" y="202">Repositories</text><text class="small" x="334" y="224">DB-backed responses</text>
+        </svg>
+      </article>
+
+      <article class="card wide db">
+        <h2>Asyncio Task Relationships</h2>
+        <p>The foreground CLI process launches cooperating services on one event loop. Durable state sits in SQLite while Herdr integration remains behind the adapter boundary.</p>
+        <svg viewBox="0 0 1180 360">
+          <defs><marker id="a7" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#f97316"></path></marker></defs>
+          <path class="flow" stroke="#22d3ee" marker-end="url(#a7)" d="M172 96 H290"></path>
+          <path class="flow" stroke="#4aa3ff" marker-end="url(#a7)" d="M412 96 H528"></path>
+          <path class="flow" stroke="#ff5c7a" marker-end="url(#a7)" d="M412 166 H528"></path>
+          <path class="flow" stroke="#36d399" marker-end="url(#a7)" d="M412 236 H528"></path>
+          <path class="flow" stroke="#f97316" marker-end="url(#a7)" d="M746 166 H860"></path>
+          <path class="flow" stroke="#a3e635" marker-end="url(#a7)" d="M746 236 H860"></path>
+          <rect class="box" x="42" y="58" width="160" height="76"></rect><text class="label" x="64" y="88">herdmaster start</text><text class="small" x="64" y="110">load config + init DB</text>
+          <rect class="box" x="290" y="58" width="150" height="76"></rect><text class="label" x="312" y="88">API listener</text><text class="small" x="312" y="110">socket/http clients</text>
+          <rect class="box" x="290" y="128" width="150" height="76"></rect><text class="label" x="312" y="158">Watchdog task</text><text class="small" x="312" y="180">run + primary task</text>
+          <rect class="box" x="290" y="198" width="150" height="76"></rect><text class="label" x="312" y="228">Dispatch loop</text><text class="small" x="312" y="250">claim idle agents</text>
+          <rect class="box" x="528" y="58" width="150" height="76"></rect><text class="label" x="550" y="88">Bus server</text><text class="small" x="550" y="110">socket + pump tasks</text>
+          <rect class="box" x="528" y="128" width="150" height="76"></rect><text class="label" x="550" y="158">TTL sweep</text><text class="small" x="550" y="180">expire messages</text>
+          <rect class="box" x="528" y="198" width="150" height="76"></rect><text class="label" x="550" y="228">Herdr adapter</text><text class="small" x="550" y="250">subprocess boundary</text>
+          <rect class="box" x="860" y="128" width="150" height="76"></rect><text class="label" x="882" y="158">SQLite WAL</text><text class="small" x="882" y="180">repos + indexes</text>
+          <rect class="box" x="860" y="198" width="150" height="76"></rect><text class="label" x="882" y="228">Agent panes</text><text class="small" x="882" y="250">A1-A8 in Herdr</text>
+          <circle class="beat" cx="1050" cy="166" r="9" fill="#f97316"></circle><text class="small" x="1064" y="170">commit after each repository operation</text>
+        </svg>
+        <div class="notes">
+          <div class="note"><strong>Bus task</strong> Unix server accepts clients; subscriber pumps run per writer.</div>
+          <div class="note"><strong>Watchdog task</strong> main loop plus optional primary listener; polling continues if primary is absent.</div>
+          <div class="note"><strong>Dispatch task</strong> scans idle/healthy agents, CAS-claims work, then injects prompts.</div>
+          <div class="note"><strong>API task</strong> one route dispatcher covers system, tasks, projects, agents, messages, metrics.</div>
+          <div class="note"><strong>Storage</strong> SQLite stores durable state; config is TOML with hot reload support.</div>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

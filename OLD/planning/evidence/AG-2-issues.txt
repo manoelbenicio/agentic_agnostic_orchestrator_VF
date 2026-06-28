@@ -1,0 +1,11 @@
+# F2 Issues Evidence
+
+## API /issues
+[{"issue_id":"issue-f2-evidence","tenant_id":"tenant-a","project_id":"project-a","title":"F2 issue tracker evidence","description":"Validate list board swimlane gantt and dispatch controls","status":"backlog","priority":"high","assignee_runtime":"runtime-local","operation_mode":"terminal","due_date":null,"metadata":{},"created_at":"2026-06-26T12:42:18.310630Z","updated_at":"2026-06-26T12:42:18.310630Z","deleted_at":null}]
+
+## Frontend /issues status
+HTTP 000 bytes 0
+
+## Verification
+pytest: 89 passed, 1 warning
+next build: compiled successfully; /issues dynamic route generated

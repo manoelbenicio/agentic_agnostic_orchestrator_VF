@@ -13,12 +13,20 @@ import redis
 from fastapi import Depends, FastAPI, HTTPException, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
+try:
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+except ImportError:  # pragma: no cover - optional instrumentation dependency
+    trace = None  # type: ignore[assignment]
+    OTLPSpanExporter = None  # type: ignore[assignment]
+    FastAPIInstrumentor = None  # type: ignore[assignment]
+    Resource = None  # type: ignore[assignment]
+    TracerProvider = None  # type: ignore[assignment]
+    BatchSpanProcessor = None  # type: ignore[assignment]
 
 from core import OperationMode, TaskBudget, TaskEnvelope
 from finops import Attribution, SeatUsage, TokenUsage
@@ -37,7 +45,13 @@ from seats_api import router as seats_router
 from sessions_api import router as sessions_router
 from tracing import TraceLayer, TraceSignalType
 
+from .provisioning.routes import router as provisioning_router
+from .provisioning.websocket import router as provisioning_live_router
+
+from .dashboards import build_dashboards_router
 from .dependencies import AppState, build_state, close_state, collect_events, refresh_message_bus
+from .migrations import run_alembic_migrations
+from .provisioning import build_provisioning_failure_router
 from .schemas import (
     AgentCreateRequest,
     SeatCostRequest,
@@ -46,7 +60,7 @@ from .schemas import (
     TraceArtifactRequest,
     TraceEventRequest,
 )
-from .security import SecurityMiddleware, SecurityMiddlewareConfig
+from .security import SecurityMiddleware, SecurityMiddlewareConfig, RBACAuthorizationMiddleware
 from .settings import Settings
 
 logger = logging.getLogger(__name__)
@@ -57,7 +71,9 @@ def create_app(settings: Settings | None = None, state: AppState | None = None) 
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        app.state.container = state or build_state(settings)
+        if state is None:
+            run_alembic_migrations(effective_settings)
+        app.state.container = state or build_state(effective_settings)
         try:
             yield
         finally:
@@ -83,6 +99,7 @@ def create_app(settings: Settings | None = None, state: AppState | None = None) 
             waf_max_body_bytes=effective_settings.security_waf_max_body_bytes,
         ),
     )
+    app.add_middleware(RBACAuthorizationMiddleware)
 
     def container() -> AppState:
         return app.state.container
@@ -112,27 +129,21 @@ def create_app(settings: Settings | None = None, state: AppState | None = None) 
     app.include_router(build_rag_router(prefix="/api/rag"))
     app.include_router(seats_router)
     app.include_router(sessions_router)
+    app.include_router(provisioning_router)
+    app.include_router(provisioning_live_router)
+    app.include_router(build_provisioning_failure_router(container))
 
     @app.get("/health")
     def health(state: AppState = Depends(container)) -> dict[str, Any]:
-        return {"status": "ok", "coupling": _coupling_health(state)}
+        return {"status": "ok", "checks": {"liveness": True}, "coupling": _coupling_health(state)}
 
     @app.get("/health/ready")
     def ready(state: AppState = Depends(container)) -> dict[str, Any]:
-        checks: dict[str, bool] = {"postgres": False, "redis": False}
-        try:
-            with state.postgres_connections[0].cursor() as cur:
-                cur.execute("SELECT 1 AS ok")
-                checks["postgres"] = bool(cur.fetchone()["ok"])
-        except psycopg.Error:
-            checks["postgres"] = False
-        try:
-            checks["redis"] = bool(state.redis_client.ping())
-        except redis.RedisError:
-            checks["redis"] = False
+        checks = _readiness_checks(state)
+        coupling = _coupling_health(state)
         if not all(checks.values()):
-            raise HTTPException(status_code=503, detail=checks)
-        return {"status": "ready", "checks": checks, "coupling": _coupling_health(state)}
+            raise HTTPException(status_code=503, detail={"status": "not_ready", "checks": checks, "coupling": coupling})
+        return {"status": "ready", "checks": checks, "coupling": coupling}
 
     @app.post("/tasks")
     async def create_task(
@@ -384,6 +395,9 @@ def create_app(settings: Settings | None = None, state: AppState | None = None) 
         ]
         return Response("\n".join(text), media_type="text/plain")
 
+    app.include_router(build_dashboards_router(container, routes=lambda: list(app.routes)))
+    app.include_router(build_dashboards_router(container, routes=lambda: list(app.routes), prefix="/dashboards"))
+
     _setup_opentelemetry(app, effective_settings)
 
     return app
@@ -396,6 +410,16 @@ def _setup_opentelemetry(app: FastAPI, settings: Settings) -> None:
     when the collector is absent or the instrumentor cannot understand a route.
     """
     if not settings.otel_enabled:
+        return
+    if (
+        trace is None
+        or OTLPSpanExporter is None
+        or FastAPIInstrumentor is None
+        or Resource is None
+        or TracerProvider is None
+        or BatchSpanProcessor is None
+    ):
+        logger.warning("AOP_OTEL_ENABLED=true but OpenTelemetry dependencies are not installed; OTel disabled")
         return
     if not settings.otel_exporter_otlp_endpoint:
         logger.warning("AOP_OTEL_ENABLED=true but OTEL_EXPORTER_OTLP_ENDPOINT is not configured; OTel disabled")
@@ -468,6 +492,34 @@ def _trace_event(event: Any) -> dict[str, Any]:
         "seat_seconds": event.seat_seconds,
         "details": event.details,
     }
+
+
+def _readiness_checks(state: AppState) -> dict[str, bool]:
+    return {
+        "postgres": _postgres_ready(state),
+        "redis": _redis_ready(state),
+    }
+
+
+def _postgres_ready(state: AppState) -> bool:
+    try:
+        with state.postgres_connections[0].cursor() as cur:
+            cur.execute("SELECT 1 AS ok")
+            row = cur.fetchone()
+    except (IndexError, AttributeError, TypeError, psycopg.Error):
+        return False
+    if isinstance(row, dict):
+        return bool(row.get("ok"))
+    if isinstance(row, tuple):
+        return bool(row and row[0])
+    return False
+
+
+def _redis_ready(state: AppState) -> bool:
+    try:
+        return bool(state.redis_client.ping())
+    except (AttributeError, TypeError, redis.RedisError):
+        return False
 
 
 def _coupling_health(state: AppState) -> dict[str, str | None]:

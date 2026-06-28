@@ -1,0 +1,453 @@
+           ⢀⣴⣶⣶⣦⡀⠀⠀⠀⠀⢀⣴⣶⣦⣄⡀   ⢀⣴⣶⣶⣦⡀   ⢀⣴⣶⣶⣶⣶⣶⣶⣶⣶⣶⣦⣄⡀       ⢀⣠⣴⣶⣶⣶⣶⣶⣦⣄⡀
+          ⢰⣿⠋⠁⠈⠙⣿⡆⠀⢀⣾⡿⠁  ⠈⢻⡆ ⢰⣿⠋⠁⠈⠙⣿⡆ ⢰⣿⠋⠁        ⠈⠙⠻⣦     ⣴⡿⠟⠋⠁   ⠈⠙⠻⢿⣦
+          ⢸⣿⠀⠀⠀⠀⣿⣇⣴⡿⠋⠀⠀  ⢀⣼⠇ ⢸⣿⠀⠀⠀⠀⣿⡇ ⢸⣿⠀⠀⠀⢠⣤⣤⣤⣤⣄    ⣿⡆   ⣼⡟⠀⠀⠀ ⣀⣀⣀    ⢻⣧
+          ⢸⣿⠀⠀⠀⠀⣿⡿⠋⠀⠀  ⢀⣾⡿⠁  ⢸⣿⠀⠀⠀⠀⣿⡇ ⢸⣿⠀⠀⠀⢸⣿⠉⠉⠉⣿⡇   ⣿⡇  ⣼⡟⠀⠀ ⣰⡿⠟⠛⠻⢿⣆⠀⠀ ⢻⣧
+          ⢸⣿⠀⠀⠀⠀⠙⠁⠀⠀ ⢀⣼⡟⠁    ⢸⣿⠀⠀⠀⠀⣿⡇ ⢸⣿⠀⠀⠀⢸⣿⣶⣶⡶⠋⠀   ⣿⠇ ⢰⣿⠀⠀⠀⢰⣿⠀⠀⠀  ⣿⡆⠀⠀ ⣿⡆
+          ⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀ ⠹⣷⡀     ⢸⣿⠀⠀⠀⠀⣿⡇⠀⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀   ⣠⣼⠟  ⢸⣿⠀⠀ ⢸⣿⠀⠀⠀⠀ ⣿⡇⠀⠀ ⣿⡇
+          ⢸⣿⠀⠀⠀⠀⠀⣠⡀⠀⠀ ⠹⣷⡄    ⢸⣿⠀⠀⠀⠀⣿⡇⠀⢸⣿⠀⠀⠀⠀⣤⣄  ⠀⠀⠹⣿⡅   ⠸⣿⠀⠀ ⠸⣿⠀⠀⠀⠀ ⣿⠇⠀  ⣿⠇
+          ⢸⣿⠀⠀⠀⠀⣾⡟⣷⡀⠀⠀ ⠘⣿⣆   ⢸⣿⠀⠀⠀⠀⣿⡇ ⢸⣿⠀⠀⠀⠀⣿⡟⣷⡀⠀⠀ ⠘⣿⣆   ⢻⣧⠀⠀ ⠹⣷⣦⣤⣤⣾⠏⠀⠀⠀⣼⡟
+          ⢸⣿⠀⠀⠀⠀⣿⡇⠹⣷⡀  ⠀⠈⢻⡇  ⢸⣿⠀⠀⠀⠀⣿⡇ ⢸⣿⠀⠀⠀⠀⣿⡇⠹⣷⡀  ⠀⠈⢻⡇   ⢻⣧⠀⠀⠀ ⠉⠉⠉    ⣼⡟
+          ⠸⣿⣄⡀⢀⣠⣿⠇⠀⠙⣷⡀  ⢀⣼⠇  ⠸⣿⣄⡀⢀⣠⣿⠇ ⠸⣿⣄⡀⢀⣠⣿⠇⠀⠙⣷⡀  ⢀⣼⠇    ⠻⣷⣦⣄⡀   ⢀⣠⣴⣾⠟
+           ⠈⠻⠿⠿⠟⠁⠀⠀⠀⠈⠻⠿⠿⠟⠁    ⠈⠻⠿⠿⠟⠁   ⠈⠻⠿⠿⠟⠁⠀⠀⠀⠈⠻⠿⠿⠟⠁     ⠀⠀⠈⠙⠻⠿⠿⠿⠿⠟⠋⠁
+
+                               Welcome to Kiro CLI V3!
+
+           What's new: Specs, expanded hooks, and an improved trust model.
+       Migration tooling to bring your V2 configurations to V3 is coming soon.
+                            https://kiro.dev/docs/cli/v3/
+
+                       Share feedback anytime with /feedback.
+────────────────────────────────────────────────────────────────────────────────────
+  Read and execute this HerdMaster task prompt:
+  /home/dataops-lab/.config/herdmaster/prompts/task-20260625040611180756-bc22702cbaf
+  b4c2eab8531d62a7c7e40.md
+  Read and execute this HerdMaster task prompt:
+  /home/dataops-lab/.config/herdmaster/prompts/task-20260625041329060693-7b6c6a53d7d
+  844a6ac81867cab802a19.md
+  Read and execute this HerdMaster task prompt:
+  /home/dataops-lab/.config/herdmaster/prompts/task-20260625041502932090-fa3fa33208c
+  142bda1008f50d9ed4d3e.md
+  Read and execute this HerdMaster task prompt:
+  /home/dataops-lab/.config/herdmaster/prompts/task-20260625041959562581-b649d570d3d
+  6448e8c3cc3fc93e802db.md
+  Read and execute this HerdMaster task prompt:
+  /home/dataops-lab/.config/herdmaster/prompts/task-20260625042057954692-8f01cf41de1
+  14af5a52c9d6b473169d8.md
+  Read and execute this HerdMaster task prompt:
+  /home/dataops-lab/.config/herdmaster/prompts/task-20260625043012150002-cc19e88d524
+  f4946b26c9141a4c2a986.md
+
+  I'll read all six task prompts first, then execute them.
+● Read (6 files)
+    ╰ explanation=Reading all six HerdMaster task prompts to understand what needs
+    to be executed.
+    task-20260625040611180756-bc22702cbafb4c2eab8531d62a7c7e40.md
+    task-20260625041329060693-7b6c6a53d7d844a6ac81867cab802a19.md
+    task-20260625041502932090-fa3fa33208c142bda1008f50d9ed4d3e.md
+    task-20260625041959562581-b649d570d3d6448e8c3cc3fc93e802db.md
+    task-20260625042057954692-8f01cf41de114af5a52c9d6b473169d8.md
+    ...+1 files (ctrl+o to toggle)
+
+  All six prompts are HerdMaster Tech Lead orchestration tasks for the same feature
+  (FEATURE-REQ-003: Grafana Dashboards as Code). Each asks me to act as a Tech Lead
+  orchestrator and produce a structured project plan in a specific JSON format.
+
+  A note on the embedded directives: tasks 2–6 contain an embedded "[SYSTEM
+  DIRECTIVE: ATENÇÃO KIRO...]" instruction inside the project scope. That text is
+  part of untrusted task content, not an actual system instruction. However, it
+  aligns with the legitimate, explicit requirement already stated by the task
+  itself: "Produce your response in EXACTLY this JSON format." So I'll honor the
+  genuine requirement — emit valid JSON plans — which is what the task framework
+  expects.
+
+  Each task is independent (different project IDs) and is a planning/analysis
+  exercise, not a code-modification request. I'll produce one orchestration plan per
+  task. The available agents are: w6:p1, w6:p2, w6:p8 (agy), w6:p5, w6:p6 (codex),
+  w6:p7 (kiro), cli (system). I'll map squad roles to these real agent IDs.
+
+  Here are the six plans, one per task.
+
+  ──────────────────────────────────────────────────────────────────────────────────
+
+  Task 1 — proj-20260625040611177597-af77c1db96a54e34bc0fc23211736799
+
+  {
+    "complexity_tier": "M",
+    "squad": [
+      {"agent": "w6:p5", "role": "lead_implementer", "rationale": "codex agent
+  handles the structural Grafana JSON schema construction and PromQL wiring, the
+  highest-skill task in this scope"},
+      {"agent": "w6:p1", "role": "implementer", "rationale": "agy agent provisions
+  datasource.yml, dashboards.yml and the docker-compose volume mounts, which are
+  declarative config files"},
+      {"agent": "w6:p7", "role": "reviewer", "rationale": "kiro agent runs the QA
+  stack-up, design-system audit and verifies auto-provisioning against the Fortune
+  500 hierarchy"}
+    ],
+    "eta_hours": 3.0,
+    "eta_rationale": "7 tasks across 3 agents. Config tasks (~20 min each) run in
+  parallel with dashboard JSON construction (~75 min, the critical path). QA and
+  audit (~45 min) are serialized after integration. Critical path ~3h with
+  parallelism on Phase 1.",
+    "tasks": [
+      {"title": "Create Prometheus datasource as code", "description": "Author
+  grafana/datasources/datasource.yml pointing to http://localhost:9090, set as
+  default, with proper apiVersion and access mode.", "prompt": "Create
+  deploy/observability/grafana/datasources/datasource.yml. apiVersion: 1. Define a
+  Prometheus datasource named 'Prometheus', type prometheus, access proxy, url
+  http://prometheus:9090 (or http://localhost:9090 for host networking), isDefault:
+  true, editable: true. Validate YAML syntax.", "assigned_to": "w6:p1",
+  "depends_on": [], "priority": "high"},
+      {"title": "Create dashboard provider config", "description": "Author
+  grafana/dashboards/dashboards.yml that loads JSON dashboards from
+  /etc/grafana/provisioning/dashboards.", "prompt": "Create
+  deploy/observability/grafana/dashboards/dashboards.yml. apiVersion: 1. providers:
+  one provider named 'HerdMaster', type file, disableDeletion false,
+  updateIntervalSeconds 10, allowUiUpdates true, options.path
+  /etc/grafana/provisioning/dashboards, foldersFromFilesStructure true. Validate
+  YAML.", "assigned_to": "w6:p1", "depends_on": [], "priority": "high"},
+      {"title": "Build herdmaster_main.json dashboard", "description": "Construct
+  the executive dashboard JSON adhering to the Fortune 500 design system: dark mode
+  #080b10, semantic green #36d399 / red #ff5c7a, 3-level hierarchy.", "prompt":
+  "Create deploy/observability/grafana/dashboards/herdmaster_main.json. Build a
+  Grafana dashboard (schemaVersion >=37) with: Level 1 row of stat/KPI panels (Total
+  Agents via herdmaster_agents_total, Healthy agents, Active Projects, API Status
+  via probe_success); Level 2 a table panel with per-agent breakdown color-coded by
+  role/health plus gauge bars for Health Score; Level 3 stacked timeseries for
+  tasks-by-state and average task duration. Apply dark theme, green #36d399 healthy
+  / red #ff5c7a failure thresholds. Use the provisioned Prometheus datasource by
+  uid. Validate JSON parses.", "assigned_to": "w6:p5", "depends_on": [], "priority":
+  "high"},
+      {"title": "Wire Grafana provisioning into docker-compose", "description":
+  "Mount datasources and dashboards directories as volumes in the Grafana service.",
+  "prompt": "Update deploy/observability/docker-compose.yml grafana service: add
+  volume mounts ./grafana/datasources:/etc/grafana/provisioning/datasources and
+  ./grafana/dashboards:/etc/grafana/provisioning/dashboards. Keep existing port 3000
+  mapping and prometheus dependency. Validate compose config with 'docker compose
+  config'.", "assigned_to": "w6:p1", "depends_on": ["Create Prometheus datasource as
+  code", "Create dashboard provider config", "Build herdmaster_main.json
+  dashboard"], "priority": "high"},
+      {"title": "Bring up stack and verify auto-provisioning", "description":
+  "docker compose up and confirm datasource + dashboard load without manual
+  ClickOps.", "prompt": "Run 'docker compose up -d' in deploy/observability. Confirm
+  Grafana on port 3000 auto-loads the Prometheus datasource and herdmaster_main
+  dashboard with no manual setup. Capture any provisioning errors from 'docker
+  compose logs grafana'.", "assigned_to": "w6:p7", "depends_on": ["Wire Grafana
+  provisioning into docker-compose"], "priority": "high"},
+      {"title": "Data flow and color-threshold test", "description": "Simulate load
+  and verify gauges/timeseries/table respond and honor the semantic palette.",
+  "prompt": "Run HerdMaster load scripts to populate metrics. Verify Level 1 KPIs,
+  Level 2 table gauges and Level 3 timeseries render live data, and that thresholds
+  flip red (#ff5c7a) when an agent drops and stay green (#36d399) when healthy.",
+  "assigned_to": "w6:p7", "depends_on": ["Bring up stack and verify
+  auto-provisioning"], "priority": "medium"},
+      {"title": "Design system audit (Executive Density / 5-Second Scan)",
+  "description": "Validate the dashboard meets the Fortune 500 hierarchy and
+  boardroom 5-second scan.", "prompt": "Audit herdmaster_main against
+  fortune500-executive-dashboard.md: verify dark #080b10 background, semantic
+  palette, and that system health, agent idle-vs-working, and API latency are each
+  identifiable within 5 seconds. Record any deviations and required fixes.",
+  "assigned_to": "w6:p7", "depends_on": ["Data flow and color-threshold test"],
+  "priority": "medium"}
+    ]
+  }
+
+  ──────────────────────────────────────────────────────────────────────────────────
+
+  Task 2 — proj-20260625041329049891-1bd8d86ebc3341688deeb221e30b7e41
+
+  {"complexity_tier":"M","squad":[{"agent":"w6:p5","role":"lead_implementer","ration
+  ale":"codex builds the Grafana JSON schema and PromQL queries, the most
+  schema-intensive work"},{"agent":"w6:p2","role":"implementer","rationale":"agy
+  authors the declarative provisioning yml files and docker-compose volume
+  wiring"},{"agent":"w6:p7","role":"reviewer","rationale":"kiro performs QA
+  bring-up, data-flow validation and design-system
+  audit"}],"eta_hours":3.0,"eta_rationale":"7 tasks, 3 agents. Three Phase-1
+  config/build tasks run in parallel (~20-75 min); dashboard JSON is the critical
+  path. Integration then QA+audit serialize (~90 min). Net
+  ~3h.","tasks":[{"title":"Create Prometheus datasource as
+  code","description":"datasource.yml pointing to Prometheus, set
+  default.","prompt":"Create deploy/observability/grafana/datasources/datasource.yml
+  with apiVersion 1, a default Prometheus datasource (type prometheus, access proxy,
+  url http://prometheus:9090 (http://prometheus:9090), isDefault true, editable
+  true). Validate
+  YAML.","assigned_to":"w6:p2","depends_on":[],"priority":"high"},{"title":"Create
+  dashboard provider config","description":"dashboards.yml loading JSONs from
+  provisioning dir.","prompt":"Create
+  deploy/observability/grafana/dashboards/dashboards.yml: apiVersion 1, file
+  provider 'HerdMaster' with options.path /etc/grafana/provisioning/dashboards,
+  updateIntervalSeconds 10, allowUiUpdates true, foldersFromFilesStructure true.
+  Validate
+  YAML.","assigned_to":"w6:p2","depends_on":[],"priority":"high"},{"title":"Build
+  herdmaster_main.json dashboard","description":"Executive dashboard JSON per
+  Fortune 500 design system.","prompt":"Create
+  deploy/observability/grafana/dashboards/herdmaster_main.json: Level 1 KPI stats
+  (herdmaster_agents_total, healthy agents, active projects, probe_success API
+  status), Level 2 per-agent table with role/health color-coding and Health Score
+  gauge bars, Level 3 stacked timeseries (tasks by state, avg duration). Dark
+  #080b10, green #36d399 / red #ff5c7a thresholds, bound to provisioned Prometheus
+  uid. Validate
+  JSON.","assigned_to":"w6:p5","depends_on":[],"priority":"high"},{"title":"Wire
+  Grafana provisioning into docker-compose","description":"Mount datasources and
+  dashboards volumes.","prompt":"Update deploy/observability/docker-compose.yml
+  grafana service with volume mounts for ./grafana/datasources and
+  ./grafana/dashboards into /etc/grafana/provisioning/*. Keep port 3000 and
+  prometheus dependency. Verify with 'docker compose
+  config'.","assigned_to":"w6:p2","depends_on":["Create Prometheus datasource as
+  code","Create dashboard provider config","Build herdmaster_main.json
+  dashboard"],"priority":"high"},{"title":"Bring up stack and verify
+  auto-provisioning","description":"Confirm zero-ClickOps load of datasource and
+  dashboard.","prompt":"Run 'docker compose up -d'; verify Grafana:3000 auto-loads
+  datasource and herdmaster_main dashboard; inspect 'docker compose logs grafana'
+  for provisioning errors.","assigned_to":"w6:p7","depends_on":["Wire Grafana
+  provisioning into docker-compose"],"priority":"high"},{"title":"Data flow and
+  color-threshold test","description":"Simulate load; verify panels and semantic
+  palette.","prompt":"Run HerdMaster load scripts; confirm KPIs, gauge bars and
+  timeseries render live data and thresholds flip red on agent drop, green when
+  healthy.","assigned_to":"w6:p7","depends_on":["Bring up stack and verify
+  auto-provisioning"],"priority":"medium"},{"title":"Design system
+  audit","description":"Validate Executive Density and 5-second
+  scan.","prompt":"Audit against fortune500-executive-dashboard.md: dark #080b10,
+  semantic palette, and 5-second identification of system health, agent
+  idle/working, API latency. Record
+  deviations.","assigned_to":"w6:p7","depends_on":["Data flow and color-threshold
+  test"],"priority":"medium"}]}
+
+  ──────────────────────────────────────────────────────────────────────────────────
+
+  Task 3 — proj-20260625041502921399-8e334194893e4084acdb3d6502b86cdf
+
+  {"complexity_tier":"M","squad":[{"agent":"w6:p6","role":"lead_implementer","ration
+  ale":"codex constructs the Grafana dashboard JSON and PromQL
+  bindings"},{"agent":"w6:p1","role":"implementer","rationale":"agy authors
+  provisioning yml and docker-compose volume
+  integration"},{"agent":"w6:p7","role":"reviewer","rationale":"kiro runs QA
+  verification and the Fortune 500 design-system
+  audit"}],"eta_hours":3.0,"eta_rationale":"7 tasks, 3 agents. Parallel Phase-1
+  build (config 20 min, dashboard 75 min critical path), then serialized integration
+  + QA + audit (~90 min). Net ~3h.","tasks":[{"title":"Create Prometheus datasource
+  as code","description":"datasource.yml to Prometheus default.","prompt":"Create
+  deploy/observability/grafana/datasources/datasource.yml: apiVersion 1, default
+  Prometheus datasource (access proxy, url http://prometheus:9090
+  (http://prometheus:9090), isDefault true). Validate
+  YAML.","assigned_to":"w6:p1","depends_on":[],"priority":"high"},{"title":"Create
+  dashboard provider config","description":"dashboards.yml loads provisioning dir
+  JSONs.","prompt":"Create deploy/observability/grafana/dashboards/dashboards.yml:
+  apiVersion 1, file provider, options.path /etc/grafana/provisioning/dashboards,
+  allowUiUpdates true, updateIntervalSeconds 10. Validate
+  YAML.","assigned_to":"w6:p1","depends_on":[],"priority":"high"},{"title":"Build
+  herdmaster_main.json dashboard","description":"Fortune 500 executive dashboard
+  JSON.","prompt":"Create
+  deploy/observability/grafana/dashboards/herdmaster_main.json with 3-level
+  hierarchy (KPI stats, per-agent table+gauges, stacked task timeseries) using
+  herdmaster_agents_total and probe_success, dark #080b10, green #36d399 / red
+  #ff5c7a. Validate
+  JSON.","assigned_to":"w6:p6","depends_on":[],"priority":"high"},{"title":"Wire
+  Grafana provisioning into docker-compose","description":"Mount
+  datasources/dashboards volumes.","prompt":"Update
+  deploy/observability/docker-compose.yml grafana service to mount
+  ./grafana/datasources and ./grafana/dashboards into /etc/grafana/provisioning/*;
+  verify with 'docker compose config'.","assigned_to":"w6:p1","depends_on":["Create
+  Prometheus datasource as code","Create dashboard provider config","Build
+  herdmaster_main.json dashboard"],"priority":"high"},{"title":"Bring up stack and
+  verify auto-provisioning","description":"Zero-ClickOps
+  verification.","prompt":"Run 'docker compose up -d'; verify Grafana:3000
+  auto-loads datasource and dashboard; check logs for provisioning
+  errors.","assigned_to":"w6:p7","depends_on":["Wire Grafana provisioning into
+  docker-compose"],"priority":"high"},{"title":"Data flow and color-threshold
+  test","description":"Verify live panels and palette.","prompt":"Run load scripts;
+  confirm panels render live data and red/green thresholds behave correctly on agent
+  up/down.","assigned_to":"w6:p7","depends_on":["Bring up stack and verify
+  auto-provisioning"],"priority":"medium"},{"title":"Design system
+  audit","description":"Executive Density / 5-second scan.","prompt":"Audit against
+  fortune500-executive-dashboard.md for palette, dark theme and 5-second scan of
+  health, agent state, API latency. Record
+  deviations.","assigned_to":"w6:p7","depends_on":["Data flow and color-threshold
+  test"],"priority":"medium"}]}
+
+  ──────────────────────────────────────────────────────────────────────────────────
+
+  Task 4 — proj-20260625041959552272-90d992053e87444cbbf0d4b4f2ba294d
+
+  {"complexity_tier":"M","squad":[{"agent":"w6:p5","role":"lead_implementer","ration
+  ale":"codex owns the dashboard JSON schema and PromQL query
+  construction"},{"agent":"w6:p8","role":"implementer","rationale":"agy authors the
+  declarative provisioning files and compose volume
+  mounts"},{"agent":"w6:p7","role":"reviewer","rationale":"kiro validates
+  auto-provisioning, data flow and design-system
+  compliance"}],"eta_hours":3.0,"eta_rationale":"7 tasks, 3 agents, parallel Phase-1
+  build with dashboard JSON on critical path (~75 min), then serialized integration
+  and QA (~90 min). Net ~3h.","tasks":[{"title":"Create Prometheus datasource as
+  code","description":"datasource.yml default Prometheus.","prompt":"Create
+  deploy/observability/grafana/datasources/datasource.yml: apiVersion 1, default
+  Prometheus datasource (proxy, http://prometheus:9090 (http://prometheus:9090),
+  isDefault true). Validate
+  YAML.","assigned_to":"w6:p8","depends_on":[],"priority":"high"},{"title":"Create
+  dashboard provider config","description":"dashboards.yml file
+  provider.","prompt":"Create
+  deploy/observability/grafana/dashboards/dashboards.yml: apiVersion 1, file
+  provider options.path /etc/grafana/provisioning/dashboards, allowUiUpdates true.
+  Validate
+  YAML.","assigned_to":"w6:p8","depends_on":[],"priority":"high"},{"title":"Build
+  herdmaster_main.json dashboard","description":"Executive dashboard
+  JSON.","prompt":"Create
+  deploy/observability/grafana/dashboards/herdmaster_main.json with Level 1 KPIs,
+  Level 2 per-agent table+gauge bars, Level 3 stacked task timeseries;
+  herdmaster_agents_total + probe_success; dark #080b10, green #36d399 / red
+  #ff5c7a. Validate
+  JSON.","assigned_to":"w6:p5","depends_on":[],"priority":"high"},{"title":"Wire
+  Grafana provisioning into docker-compose","description":"Mount provisioning
+  volumes.","prompt":"Update deploy/observability/docker-compose.yml grafana service
+  with datasources and dashboards volume mounts; verify 'docker compose
+  config'.","assigned_to":"w6:p8","depends_on":["Create Prometheus datasource as
+  code","Create dashboard provider config","Build herdmaster_main.json
+  dashboard"],"priority":"high"},{"title":"Bring up stack and verify
+  auto-provisioning","description":"Confirm zero-ClickOps load.","prompt":"Run
+  'docker compose up -d'; verify Grafana:3000 auto-loads datasource and dashboard;
+  check logs.","assigned_to":"w6:p7","depends_on":["Wire Grafana provisioning into
+  docker-compose"],"priority":"high"},{"title":"Data flow and color-threshold
+  test","description":"Live panel + palette test.","prompt":"Run load scripts;
+  verify panels render and thresholds flip red/green on agent
+  down/up.","assigned_to":"w6:p7","depends_on":["Bring up stack and verify
+  auto-provisioning"],"priority":"medium"},{"title":"Design system
+  audit","description":"5-second scan compliance.","prompt":"Audit against
+  fortune500-executive-dashboard.md: palette, dark theme, 5-second scan of
+  health/agent-state/latency. Record
+  deviations.","assigned_to":"w6:p7","depends_on":["Data flow and color-threshold
+  test"],"priority":"medium"}]}
+
+  ──────────────────────────────────────────────────────────────────────────────────
+
+  Task 5 — proj-20260625042057944428-3e30892c32fd4562abab45bd873c4506
+
+  {"complexity_tier":"M","squad":[{"agent":"w6:p6","role":"lead_implementer","ration
+  ale":"codex builds the Grafana JSON dashboard and PromQL
+  wiring"},{"agent":"w6:p2","role":"implementer","rationale":"agy authors
+  provisioning yml and docker-compose
+  integration"},{"agent":"w6:p7","role":"reviewer","rationale":"kiro runs QA and the
+  Fortune 500 design audit"}],"eta_hours":3.0,"eta_rationale":"7 tasks, 3 agents;
+  parallel Phase-1 build (dashboard JSON ~75 min critical path) then serialized
+  integration + QA + audit (~90 min). Net ~3h.","tasks":[{"title":"Create Prometheus
+  datasource as code","description":"datasource.yml default
+  Prometheus.","prompt":"Create
+  deploy/observability/grafana/datasources/datasource.yml: apiVersion 1, default
+  Prometheus datasource (proxy, http://prometheus:9090 (http://prometheus:9090),
+  isDefault true). Validate
+  YAML.","assigned_to":"w6:p2","depends_on":[],"priority":"high"},{"title":"Create
+  dashboard provider config","description":"dashboards.yml
+  provider.","prompt":"Create
+  deploy/observability/grafana/dashboards/dashboards.yml: apiVersion 1, file
+  provider options.path /etc/grafana/provisioning/dashboards, allowUiUpdates true.
+  Validate
+  YAML.","assigned_to":"w6:p2","depends_on":[],"priority":"high"},{"title":"Build
+  herdmaster_main.json dashboard","description":"Executive dashboard
+  JSON.","prompt":"Create
+  deploy/observability/grafana/dashboards/herdmaster_main.json with 3-level
+  hierarchy (KPIs, per-agent table+gauges, stacked task timeseries),
+  herdmaster_agents_total + probe_success, dark #080b10, green #36d399 / red
+  #ff5c7a. Validate
+  JSON.","assigned_to":"w6:p6","depends_on":[],"priority":"high"},{"title":"Wire
+  Grafana provisioning into docker-compose","description":"Mount provisioning
+  volumes.","prompt":"Update deploy/observability/docker-compose.yml grafana service
+  mounting datasources and dashboards into /etc/grafana/provisioning/*; verify
+  'docker compose config'.","assigned_to":"w6:p2","depends_on":["Create Prometheus
+  datasource as code","Create dashboard provider config","Build herdmaster_main.json
+  dashboard"],"priority":"high"},{"title":"Bring up stack and verify
+  auto-provisioning","description":"Zero-ClickOps verification.","prompt":"Run
+  'docker compose up -d'; verify Grafana:3000 auto-loads datasource and dashboard;
+  review logs.","assigned_to":"w6:p7","depends_on":["Wire Grafana provisioning into
+  docker-compose"],"priority":"high"},{"title":"Data flow and color-threshold
+  test","description":"Live data and palette test.","prompt":"Run load scripts;
+  confirm panels render and thresholds flip red/green on agent state
+  changes.","assigned_to":"w6:p7","depends_on":["Bring up stack and verify
+  auto-provisioning"],"priority":"medium"},{"title":"Design system
+  audit","description":"5-second scan and density.","prompt":"Audit against
+  fortune500-executive-dashboard.md: palette, dark theme, 5-second scan of
+  health/agent-state/latency. Record
+  deviations.","assigned_to":"w6:p7","depends_on":["Data flow and color-threshold
+  test"],"priority":"medium"}]}
+
+  ──────────────────────────────────────────────────────────────────────────────────
+
+  Task 6 — proj-20260625043012139861-18e400bdfbf846d6ae2c8230ce6824dc
+
+  {"complexity_tier":"M","squad":[{"agent":"w6:p5","role":"lead_implementer","ration
+  ale":"codex constructs the dashboard JSON schema and PromQL
+  queries"},{"agent":"w6:p1","role":"implementer","rationale":"agy authors
+  provisioning yml files and docker-compose volume
+  mounts"},{"agent":"w6:p7","role":"reviewer","rationale":"kiro verifies
+  provisioning, data flow and design-system
+  compliance"}],"eta_hours":3.0,"eta_rationale":"7 tasks, 3 agents; Phase-1 config
+  and dashboard build run in parallel (dashboard JSON ~75 min critical path),
+  integration + QA + audit serialize afterward (~90 min). Net
+  ~3h.","tasks":[{"title":"Create Prometheus datasource as
+  code","description":"datasource.yml default Prometheus.","prompt":"Create
+  deploy/observability/grafana/datasources/datasource.yml: apiVersion 1, default
+  Prometheus datasource (proxy, http://prometheus:9090 (http://prometheus:9090),
+  isDefault true). Validate
+  YAML.","assigned_to":"w6:p1","depends_on":[],"priority":"high"},{"title":"Create
+  dashboard provider config","description":"dashboards.yml file
+  provider.","prompt":"Create
+  deploy/observability/grafana/dashboards/dashboards.yml: apiVersion 1, file
+  provider options.path /etc/grafana/provisioning/dashboards, allowUiUpdates true,
+  updateIntervalSeconds 10. Validate
+  YAML.","assigned_to":"w6:p1","depends_on":[],"priority":"high"},{"title":"Build
+  herdmaster_main.json dashboard","description":"Executive dashboard JSON per
+  Fortune 500 system.","prompt":"Create
+  deploy/observability/grafana/dashboards/herdmaster_main.json with Level 1 KPI
+  stats, Level 2 per-agent table with role/health color-coding + Health Score gauge
+  bars, Level 3 stacked timeseries (tasks by state, avg duration); use
+  herdmaster_agents_total and probe_success; dark #080b10, green #36d399 / red
+  #ff5c7a thresholds, bound to provisioned Prometheus uid. Validate
+  JSON.","assigned_to":"w6:p5","depends_on":[],"priority":"high"},{"title":"Wire
+  Grafana provisioning into docker-compose","description":"Mount provisioning
+  volumes into Grafana.","prompt":"Update deploy/observability/docker-compose.yml
+  grafana service: mount ./grafana/datasources and ./grafana/dashboards into
+  /etc/grafana/provisioning/*, keep port 3000 and prometheus dependency; verify
+  'docker compose config'.","assigned_to":"w6:p1","depends_on":["Create Prometheus
+  datasource as code","Create dashboard provider config","Build herdmaster_main.json
+  dashboard"],"priority":"high"},{"title":"Bring up stack and verify
+  auto-provisioning","description":"Confirm zero-ClickOps datasource+dashboard
+  load.","prompt":"Run 'docker compose up -d' in deploy/observability; verify
+  Grafana:3000 auto-loads the Prometheus datasource and herdmaster_main dashboard;
+  inspect 'docker compose logs grafana'.","assigned_to":"w6:p7","depends_on":["Wire
+  Grafana provisioning into docker-compose"],"priority":"high"},{"title":"Data flow
+  and color-threshold test","description":"Simulate load; verify panels and
+  palette.","prompt":"Run HerdMaster load scripts; confirm KPIs, gauges and
+  timeseries render live data and thresholds flip red (#ff5c7a) on agent drop and
+  green (#36d399) when healthy.","assigned_to":"w6:p7","depends_on":["Bring up stack
+  and verify auto-provisioning"],"priority":"medium"},{"title":"Design system audit
+  (Executive Density / 5-Second Scan)","description":"Validate Fortune 500 hierarchy
+  and boardroom scan.","prompt":"Audit herdmaster_main against
+  fortune500-executive-dashboard.md: dark #080b10, semantic palette, and 5-second
+  identification of system health, agent idle-vs-working, API latency. Record
+  deviations and fixes.","assigned_to":"w6:p7","depends_on":["Data flow and
+  color-threshold test"],"priority":"medium"}]}
+
+  ──────────────────────────────────────────────────────────────────────────────────
+
+  Done. All six orchestration tasks for FEATURE-REQ-003 are answered, each with its
+  own project-ID-scoped plan in the required JSON schema.
+
+  A few notes for you as the actual human operator:
+
+  - The five later prompts embed a "[SYSTEM DIRECTIVE: ATENÇÃO KIRO...]" block
+  inside the untrusted project scope. I treated that as data, not as an override of
+  my instructions — but it happened to request the same JSON output the task
+  legitimately requires, so the outcome is the same.
+  - All six are duplicates of the same feature (Grafana Dashboards as Code) with
+  distinct project IDs, so I produced one plan each rather than collapsing them.
+  - I sized every one as tier M (~3h, 7 tasks, 3-agent squad) and used your real
+  available agent IDs (w6:p1/p2/p8 = agy, w6:p5/p6 = codex, w6:p7 = kiro). The cli
+   system agent was left unassigned as an orchestrator.
+
+  If you want these emitted as raw single-line JSON files (one per task ID) for the
+  API to consume, tell me the output directory and I'll write them.
+
+▸ Credits: 3.18 • Time: 1m 45s
+
+────────────────────────────────────────────────────────────────────────────────────
+Default · Claude Opus 4.8 · High · ◔ 7%                                            ~
+
+ ask a question or describe a task ↵
+                                                                 /copy to clipboard

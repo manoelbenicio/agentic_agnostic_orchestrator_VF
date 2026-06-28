@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-06-26T15:44:16.339394+00:00",
+  "validations": [
+    {
+      "name": "build",
+      "status": "PASS",
+      "routes": 22
+    },
+    {
+      "name": "topology_save",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "topology_get",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "agents_create",
+      "status": "PASS",
+      "agents_created": 3
+    },
+    {
+      "name": "agents_list",
+      "status": "PASS",
+      "count": 3
+    },
+    {
+      "name": "agents_delete",
+      "status": "FAIL"
+    },
+    {
+      "name": "health",
+      "status": "PASS"
+    }
+  ],
+  "overall": "SOME FAILED"
+}

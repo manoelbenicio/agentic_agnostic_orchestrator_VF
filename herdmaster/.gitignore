@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# HerdMaster runtime artifacts (never commit)
+*.db
+*.db-*
+*.log
+*.sock
+
+# Secrets & credentials (never commit)
+.env
+.env.*
+*.pem
+*.key
+*.crt
+id_rsa*
+*secret*
+*credential*
+*token*
+config.toml
+herdmaster.toml
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp

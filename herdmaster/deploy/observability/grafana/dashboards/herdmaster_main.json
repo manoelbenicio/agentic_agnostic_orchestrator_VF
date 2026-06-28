@@ -1,0 +1,499 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "HerdMaster — Squad Control Center",
+  "uid": "herdmaster-squad-control",
+  "tags": ["herdmaster", "squad", "agents"],
+  "timezone": "browser",
+  "templating": {
+    "list": [
+      {
+        "name": "agent",
+        "label": "Agent Filter",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "definition": "label_values(herdmaster_agent_info, agent_id)",
+        "query": "label_values(herdmaster_agent_info, agent_id)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "sort": 1
+      },
+      {
+        "name": "route",
+        "label": "API Route",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "definition": "label_values(aop_http_requests_total, route)",
+        "query": "label_values(aop_http_requests_total, route)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "🏠 SQUAD OVERVIEW — HerdMaster Control Plane",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Total Agents",
+      "description": "Total registered agents in the control plane",
+      "gridPos": { "x": 0, "y": 1, "w": 4, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "herdmaster_agents_total", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "dark-red" }, { "value": 1, "color": "semi-dark-blue" }, { "value": 4, "color": "dark-green" }] } } },
+      "options": { "colorMode": "background_solid", "graphMode": "none", "textMode": "value_and_name" }
+    },
+    {
+      "type": "stat",
+      "title": "Healthy Agents",
+      "description": "Agents reporting healthy status",
+      "gridPos": { "x": 4, "y": 1, "w": 4, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "herdmaster_agents_healthy", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "dark-red" }, { "value": 1, "color": "dark-green" }] } } },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+    {
+      "type": "stat",
+      "title": "Unhealthy Agents",
+      "description": "Agents with degraded or failed health",
+      "gridPos": { "x": 8, "y": 1, "w": 4, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "herdmaster_agents_unhealthy", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "dark-green" }, { "value": 1, "color": "dark-orange" }, { "value": 2, "color": "dark-red" }] } } },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+    {
+      "type": "stat",
+      "title": "Active Projects",
+      "description": "Open project orchestrations",
+      "gridPos": { "x": 12, "y": 1, "w": 4, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "herdmaster_projects_total", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "semi-dark-blue" }, { "value": 1, "color": "semi-dark-purple" }] } } },
+      "options": { "colorMode": "background_solid", "graphMode": "none", "textMode": "value_and_name" }
+    },
+    {
+      "type": "stat",
+      "title": "Tasks Completed",
+      "description": "Cumulative completed tasks across all agents",
+      "gridPos": { "x": 16, "y": 1, "w": 4, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "herdmaster_agent_tasks_completed_total", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "semi-dark-yellow" }, { "value": 1, "color": "dark-green" }] } } },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+    {
+      "type": "stat",
+      "title": "API Health (E2E)",
+      "description": "End-to-end API availability via Blackbox probe",
+      "gridPos": { "x": 20, "y": 1, "w": 4, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "probe_success{instance=\"http://localhost:8080/status\"}", "refId": "A", "legendFormat": "/status" },
+        { "expr": "probe_success{instance=\"http://localhost:8080/agents\"}", "refId": "B", "legendFormat": "/agents" }
+      ],
+      "fieldConfig": { "defaults": { "mappings": [{ "options": { "1": { "text": "ONLINE ✅", "color": "dark-green" }, "0": { "text": "OFFLINE ❌", "color": "dark-red" } }, "type": "value" }] } },
+      "options": { "colorMode": "background_solid", "graphMode": "none", "textMode": "auto" }
+    },
+    {
+      "type": "row",
+      "title": "🤖 PER-AGENT BREAKDOWN",
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "table",
+      "title": "Agent Registry — Live Status",
+      "description": "Real-time agent inventory with health and role",
+      "gridPos": { "x": 0, "y": 7, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "herdmaster_agent_info{agent_id=~\"$agent\"}", "refId": "A", "format": "table", "instant": true }
+      ],
+      "transformations": [
+        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true, "Value": true }, "renameByName": { "agent_id": "Pane ID", "agent_label": "Label", "agent_type": "Type", "agent_role": "Role", "agent_state": "State", "agent_health": "Health" }, "indexByName": { "agent_id": 0, "agent_label": 1, "agent_type": 2, "agent_role": 3, "agent_state": 4, "agent_health": 5 } } }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "center", "cellOptions": { "type": "auto" } } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Health" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "basic" } }, { "id": "mappings", "value": [{ "options": { "healthy": { "color": "dark-green", "text": "✅ HEALTHY" }, "suspect": { "color": "dark-yellow", "text": "⚠️ SUSPECT" }, "unhealthy": { "color": "dark-red", "text": "❌ DOWN" } }, "type": "value" }] }] },
+          { "matcher": { "id": "byName", "options": "State" }, "properties": [{ "id": "mappings", "value": [{ "options": { "idle": { "color": "semi-dark-green", "text": "💤 IDLE" }, "working": { "color": "semi-dark-blue", "text": "⚙️ WORKING" }, "blocked": { "color": "dark-orange", "text": "🔒 BLOCKED" } }, "type": "value" }] }] },
+          { "matcher": { "id": "byName", "options": "Role" }, "properties": [{ "id": "mappings", "value": [{ "options": { "orchestrator": { "color": "dark-purple", "text": "👑 ORCHESTRATOR" }, "worker": { "color": "semi-dark-blue", "text": "🔧 WORKER" }, "observer": { "color": "semi-dark-orange", "text": "👁️ OBSERVER" } }, "type": "value" }] }] }
+        ]
+      }
+    },
+    {
+      "type": "bargauge",
+      "title": "Agent Health Score",
+      "description": "Per-agent health (1 = healthy, 0 = down)",
+      "gridPos": { "x": 0, "y": 15, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "herdmaster_agent_health{agent_id=~\"$agent\"}", "refId": "A", "legendFormat": "{{agent_label}} ({{agent_id}})" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "dark-red" }, { "value": 0.5, "color": "dark-yellow" }, { "value": 1, "color": "dark-green" }] }, "min": 0, "max": 1 } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizWidth": 8, "minVizHeight": 16 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent Health Over Time",
+      "description": "Health status timeline for all agents (1=healthy, 0=unhealthy)",
+      "gridPos": { "x": 12, "y": 15, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "herdmaster_agent_health{agent_id=~\"$agent\"}", "refId": "A", "legendFormat": "{{agent_label}} ({{agent_id}})" }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 20, "spanNulls": true, "gradientMode": "scheme", "lineStyle": { "fill": "solid" } }, "color": { "mode": "palette-classic" }, "min": 0, "max": 1, "mappings": [{ "options": { "1": { "text": "Healthy" }, "0": { "text": "Down" } }, "type": "value" }] } }
+    },
+    {
+      "type": "row",
+      "title": "📊 TASK QUEUE & PERFORMANCE",
+      "gridPos": { "x": 0, "y": 23, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Tasks by State",
+      "description": "Task distribution across states (queued, in_progress, done, failed)",
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "herdmaster_tasks_total", "refId": "A", "legendFormat": "{{state}}" }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 30, "stacking": { "mode": "normal" }, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" } } }
+    },
+    {
+      "type": "bargauge",
+      "title": "Tasks Completed per Agent",
+      "description": "Individual agent productivity",
+      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "herdmaster_agent_tasks_completed{agent_id=~\"$agent\",agent_id!=\"cli\"}", "refId": "A", "legendFormat": "{{agent_label}} ({{agent_id}})" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    },
+    {
+      "type": "row",
+      "title": "🔍 API & E2E MONITORING",
+      "gridPos": { "x": 0, "y": 32, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "API E2E Latency (ms)",
+      "description": "Full roundtrip time for Blackbox probes against HerdMaster API",
+      "gridPos": { "x": 0, "y": 33, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "probe_duration_seconds{job=\"herdmaster-e2e-api-monitor\"} * 1000", "refId": "A", "legendFormat": "{{instance}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "lineWidth": 2, "fillOpacity": 15, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" } } }
+    },
+    {
+      "type": "timeseries",
+      "title": "API HTTP Status Code",
+      "description": "HTTP status codes from E2E probes (200 = success)",
+      "gridPos": { "x": 12, "y": 33, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "probe_http_status_code{job=\"herdmaster-e2e-api-monitor\"}", "refId": "A", "legendFormat": "{{instance}}" }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 10 }, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "value": 0, "color": "dark-red" }, { "value": 200, "color": "dark-green" }, { "value": 400, "color": "dark-orange" }, { "value": 500, "color": "dark-red" }] } } }
+    },
+    {
+      "type": "row",
+      "title": "⏱️ AGENT PERFORMANCE",
+      "gridPos": { "x": 0, "y": 41, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "gauge",
+      "title": "Avg Task Duration per Agent (sec)",
+      "description": "Mean time to complete a task, per agent",
+      "gridPos": { "x": 0, "y": 42, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "herdmaster_agent_avg_task_seconds{agent_id=~\"$agent\",agent_id!=\"cli\"}", "refId": "A", "legendFormat": "{{agent_label}} ({{agent_id}})" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "continuous-GrYlRd" }, "min": 0, "max": 300, "thresholds": { "steps": [{ "value": 0, "color": "dark-green" }, { "value": 60, "color": "dark-yellow" }, { "value": 180, "color": "dark-red" }] } } },
+      "options": { "showThresholdLabels": true, "showThresholdMarkers": true }
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent Count Over Time",
+      "description": "Total healthy vs unhealthy agents timeline",
+      "gridPos": { "x": 12, "y": 42, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "herdmaster_agents_healthy", "refId": "A", "legendFormat": "Healthy" },
+        { "expr": "herdmaster_agents_unhealthy", "refId": "B", "legendFormat": "Unhealthy" }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 25, "stacking": { "mode": "normal" }, "gradientMode": "scheme" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Healthy" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "dark-green" } }] }, { "matcher": { "id": "byName", "options": "Unhealthy" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "dark-red" } }] }] }
+    },
+
+    {
+      "type": "row",
+      "title": "🛡️ REGISTRY INTEGRITY — Anti-False-Positive Monitor",
+      "description": "Detecta agentes fantasmas (auto-registrados pelo Herdr) que reportam estado falso no sistema.",
+      "gridPos": { "x": 0, "y": 100, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+
+    {
+      "type": "stat",
+      "title": "Whitelist Compliance",
+      "description": "VERDE = todos os 7 agentes canônicos no DB e nenhum fantasma. VERMELHO = agentes não-documentados presentes — falso positivo detectado.",
+      "gridPos": { "x": 0, "y": 101, "w": 5, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "herdmaster_whitelist_compliant",
+        "refId": "A",
+        "legendFormat": "Compliant"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "dark-red" },
+              { "value": 1, "color": "dark-green" }
+            ]
+          },
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "❌ VIOLADO", "color": "dark-red" } } },
+            { "type": "value", "options": { "1": { "text": "✅ OK", "color": "dark-green" } } }
+          ],
+          "unit": "short"
+        }
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none", "textMode": "value_and_name", "justifyMode": "center" }
+    },
+
+    {
+      "type": "stat",
+      "title": "Ghost Agents (Unlisted)",
+      "description": "Número de agentes no DB fora da whitelist canônica. Qualquer valor > 0 é um falso positivo. Auto-remediation é disparada pelo Alertmanager em até 10s.",
+      "gridPos": { "x": 5, "y": 101, "w": 4, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "herdmaster_unlisted_agents_total",
+        "refId": "A",
+        "legendFormat": "Ghost Agents"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "dark-green" },
+              { "value": 1, "color": "dark-red" }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+
+    {
+      "type": "stat",
+      "title": "Agent Count vs Expected",
+      "description": "Deve ser exatamente 7. Se diferente, o sistema está em estado inválido.",
+      "gridPos": { "x": 9, "y": 101, "w": 4, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "herdmaster_agents_total", "refId": "A", "legendFormat": "Actual" },
+        { "expr": "herdmaster_agents_expected_total", "refId": "B", "legendFormat": "Expected" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "dark-red" },
+              { "value": 7, "color": "dark-green" },
+              { "value": 8, "color": "dark-red" }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none", "textMode": "value_and_name" }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Registry Integrity History (1h)",
+      "description": "Histórico de compliance. Deve manter-se em 1 (verde). Quedas para 0 indicam eventos de auto-registro do Herdr detectados e remediados.",
+      "gridPos": { "x": 13, "y": 101, "w": 11, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "herdmaster_whitelist_compliant", "refId": "A", "legendFormat": "Whitelist Compliant" },
+        { "expr": "herdmaster_unlisted_agents_total", "refId": "B", "legendFormat": "Ghost Agents" }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 20 } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Whitelist Compliant" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "dark-green" } }] },
+          { "matcher": { "id": "byName", "options": "Ghost Agents" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "dark-red" } }] }
+        ]
+      }
+    },
+
+    {
+      "type": "table",
+      "title": "🔍 Ghost Agents Detail (drill-down)",
+      "description": "Lista todos os agentes fantasmas detectados com ID, label e tipo. Vazio = sistema limpo. Atualizado a cada 5s pelo Prometheus.",
+      "gridPos": { "x": 0, "y": 106, "w": 24, "h": 6 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "herdmaster_unlisted_agent_info",
+        "refId": "A",
+        "legendFormat": "",
+        "instant": true
+      }],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "left" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "agent_id" }, "properties": [{ "id": "displayName", "value": "Pane ID (ghost)" }, { "id": "custom.width", "value": 120 }] },
+          { "matcher": { "id": "byName", "options": "agent_label" }, "properties": [{ "id": "displayName", "value": "Label" }, { "id": "custom.width", "value": 200 }] },
+          { "matcher": { "id": "byName", "options": "agent_type" }, "properties": [{ "id": "displayName", "value": "Tipo" }, { "id": "custom.width", "value": 100 }] },
+          { "matcher": { "id": "byName", "options": "Value" }, "properties": [{ "id": "displayName", "value": "Ativo" }, { "id": "custom.width", "value": 60 }] }
+        ]
+      },
+      "options": {
+        "frameIndex": 0,
+        "showHeader": true,
+        "footer": { "show": false }
+      },
+      "transformations": [
+        { "id": "labelsToFields", "options": { "valueLabel": "agent_id" } },
+        { "id": "filterFieldsByName", "options": { "include": { "names": ["agent_id", "agent_label", "agent_type", "Value"] } } }
+      ]
+    },
+
+    {
+      "type": "row",
+      "title": "🛤️ API TRAFFIC BY ROUTE — Per-Endpoint Breakdown",
+      "description": "Real-time per-route request volume, error rate, and latency from aop_http_requests_total and aop_http_request_duration_seconds",
+      "gridPos": { "x": 0, "y": 112, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Requests per Route (rate/s)",
+      "description": "Per-second request rate grouped by API route path. Use the Route Filter variable to drill into specific endpoints.",
+      "gridPos": { "x": 0, "y": 113, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(rate(aop_http_requests_total{route=~\"$route\"}[5m])) by (route)",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 15, "gradientMode": "scheme", "showPoints": "auto" }, "color": { "mode": "palette-classic" }, "unit": "reqps" } }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Error Rate per Route (4xx+5xx/s)",
+      "description": "Rate of client and server errors per route. Spikes highlight broken or unstable endpoints.",
+      "gridPos": { "x": 12, "y": 113, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(rate(aop_http_requests_total{route=~\"$route\",status=~\"4..|5..\"}[5m])) by (route)",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 20, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" }, "unit": "reqps" } }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "p95 Latency per Route (s)",
+      "description": "95th percentile response time per route from aop_http_request_duration_seconds histogram.",
+      "gridPos": { "x": 0, "y": 121, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(aop_http_request_duration_seconds_bucket{route=~\"$route\"}[5m])) by (le, route))",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "lineWidth": 2, "fillOpacity": 10, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" } } }
+    },
+
+    {
+      "type": "bargauge",
+      "title": "Top Routes by Volume (5m)",
+      "description": "Routes ranked by total request count. Shows which endpoints receive the most traffic.",
+      "gridPos": { "x": 12, "y": 121, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "topk(10, sum(increase(aop_http_requests_total{route=~\"$route\"}[5m])) by (route))",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    },
+
+    {
+      "type": "row",
+      "title": "📈 PER-AGENT TASK THROUGHPUT — Productivity Metrics",
+      "gridPos": { "x": 0, "y": 129, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Tasks Completed per Agent (rate)",
+      "description": "Rate of task completions per agent over time. Shows which agents are most productive.",
+      "gridPos": { "x": 0, "y": 130, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "herdmaster_agent_tasks_completed{agent_id=~\"$agent\",agent_id!=\"cli\"}",
+        "refId": "A",
+        "legendFormat": "{{agent_label}} ({{agent_id}})"
+      }],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 15, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" } } }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Avg Task Duration per Agent (s)",
+      "description": "Average task completion time per agent. Helps identify slow agents or complex task assignments.",
+      "gridPos": { "x": 12, "y": 130, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "herdmaster_agent_avg_task_seconds{agent_id=~\"$agent\",agent_id!=\"cli\"}",
+        "refId": "A",
+        "legendFormat": "{{agent_label}} ({{agent_id}})"
+      }],
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "lineWidth": 2, "fillOpacity": 15, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" } } }
+    }
+
+  ],
+  "schemaVersion": 36,
+  "version": 4,
+  "refresh": "5s",
+  "time": { "from": "now-1h", "to": "now" },
+  "style": "dark"
+}
+

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSS Universal Standard — Indra Corporate Design System v3.0</title>
+  <meta name="description" content="Interactive showcase for the Official Indra Corporate Design System. 12 canonical swatches, full component library, and deployment protocol.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Nav: 56px height, --indra-deep bg -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <path d="M14 2L2 8l12 6 12-6-12-6z" stroke="#00B0BD" stroke-width="1.5" fill="none"/>
+        <path d="M2 20l12 6 12-6" stroke="#00B0BD" stroke-width="1.5" fill="none"/>
+        <path d="M2 14l12 6 12-6" stroke="#00B0BD" stroke-width="1.5" fill="none"/>
+      </svg>
+      <span class="nav-title">PortalShift Intelligence</span>
+    </div>
+    <div class="nav-links">
+      <a href="#colors" class="nav-link">Colors</a>
+      <a href="#typography" class="nav-link">Typography</a>
+      <a href="#components" class="nav-link">Components</a>
+      <a href="#forms" class="nav-link">Forms</a>
+      <a href="#hero-demo" class="nav-link">Hero</a>
+    </div>
+    <span class="nav-tag">Design System Standard</span>
+  </nav>
+
+  <main>
+    <!-- Hero: --indra-deep bg + radial-gradient overlays + Canvas 2D geodesic sphere -->
+    <section class="hero-banner" id="hero-demo">
+      <canvas id="heroCanvas"></canvas>
+      <div class="hero-content" data-animate>
+        <p class="hero-eyebrow">DSS-INDRAMIND-2026-001 · v3.0.0</p>
+        <h1 class="hero-headline">Future<br>by <span class="text-cyan">Design</span></h1>
+        <p class="hero-subtitle">The universal standard for shipping hundreds of brand-compliant applications. Built entirely from the official Indra corporate palette.</p>
+        <div class="hero-actions">
+          <a href="#colors" class="btn btn-cyan">Explore Palette</a>
+          <a href="#components" class="btn btn-secondary">View Components</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Colors: 12 Canonical Swatches -->
+    <section class="section" id="colors">
+      <div class="container">
+        <div class="section-header" data-animate>
+          <p class="section-eyebrow">01 / Official Corporate Palette</p>
+          <h2 class="section-title">12 Canonical Swatches</h2>
+          <p class="section-desc">The only colors permitted. No substitution, no approximation.</p>
+        </div>
+
+        <h3 class="subsection-title" data-animate>Core Brand</h3>
+        <div class="color-grid" data-animate>
+          <div class="color-swatch" style="--swatch-bg:#002B3A"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Deep ★</span><span class="swatch-hex">#002B3A</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#003E50"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Dark</span><span class="swatch-hex">#003E50</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#06596E"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Primary</span><span class="swatch-hex">#06596E</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#346679"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Secondary</span><span class="swatch-hex">#346679</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#00B0BD"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Cyan ★</span><span class="swatch-hex">#00B0BD</span></div></div>
+        </div>
+
+        <h3 class="subsection-title" data-animate>Extended Palette</h3>
+        <div class="color-grid" data-animate>
+          <div class="color-swatch" style="--swatch-bg:#3F96AE"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Teal</span><span class="swatch-hex">#3F96AE</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#7A9CAE"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Light</span><span class="swatch-hex">#7A9CAE</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#B3C1DA"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Blue-Gray</span><span class="swatch-hex">#B3C1DA</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#BADFF3"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Sky</span><span class="swatch-hex">#BADFF3</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#B0B4BD"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Warm Gray</span><span class="swatch-hex">#B0B4BD</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#F2F5F6"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Off-White</span><span class="swatch-hex">#F2F5F6</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#FFFFFF"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">White</span><span class="swatch-hex">#FFFFFF</span></div></div>
+        </div>
+
+        <h3 class="subsection-title" data-animate>Status Colors</h3>
+        <div class="color-grid color-grid--status" data-animate>
+          <div class="color-swatch" style="--swatch-bg:#27AE60"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Success</span><span class="swatch-hex">#27AE60</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#FF9800"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Warning</span><span class="swatch-hex">#FF9800</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#E91E63"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Error</span><span class="swatch-hex">#E91E63</span></div></div>
+          <div class="color-swatch" style="--swatch-bg:#FFC107"><div class="swatch-fill"></div><div class="swatch-info"><span class="swatch-name">Gold</span><span class="swatch-hex">#FFC107</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Typography -->
+    <section class="section section--alt" id="typography">
+      <div class="container">
+        <div class="section-header" data-animate>
+          <p class="section-eyebrow">02 / Typography</p>
+          <h2 class="section-title">Type Scale</h2>
+          <p class="section-desc">Segoe UI / Inter — systematic, corporate precision.</p>
+        </div>
+        <div class="type-showcase" data-animate>
+          <div class="type-row"><div class="type-meta"><span class="type-level">Display</span><span class="type-specs">64px / 700 / -0.02em</span></div><p class="type-sample text-display">Powered by <span class="text-cyan">intelligence</span></p></div>
+          <div class="type-row"><div class="type-meta"><span class="type-level">Hero</span><span class="type-specs">52px / 300 / -0.02em</span></div><p class="type-sample text-hero">Future by <span class="text-cyan">Design</span></p></div>
+          <div class="type-row"><div class="type-meta"><span class="type-level">H1</span><span class="type-specs">48px / 600 / -0.01em</span></div><p class="type-sample text-h1">Secure by Design</p></div>
+          <div class="type-row"><div class="type-meta"><span class="type-level">H2</span><span class="type-specs">32px / 600</span></div><p class="type-sample text-h2">Intelligence at Scale</p></div>
+          <div class="type-row"><div class="type-meta"><span class="type-level">H3</span><span class="type-specs">24px / 500</span></div><p class="type-sample text-h3">Precision in Action</p></div>
+          <div class="type-row"><div class="type-meta"><span class="type-level">Body Lg</span><span class="type-specs">18px / 400 / 1.6</span></div><p class="type-sample text-body-lg">IndraMind enables an advanced AI-powered digital offering to manage hybrid conflicts through a holistic Security and Defense approach.</p></div>
+          <div class="type-row"><div class="type-meta"><span class="type-level">Label</span><span class="type-specs">14px / 700 / -0.01em</span></div><p class="type-sample text-label">Email Address</p></div>
+          <div class="type-row"><div class="type-meta"><span class="type-level">Eyebrow</span><span class="type-specs">12px / 500 / 0.1em</span></div><p class="type-sample text-eyebrow">SOVEREIGN BY CHOICE</p></div>
+          <div class="type-row"><div class="type-meta"><span class="type-level">Stat Value</span><span class="type-specs">22px / 700 / -0.02em</span></div><p class="type-sample text-stat-val">38,847</p></div>
+          <div class="type-row"><div class="type-meta"><span class="type-level">Stat Label</span><span class="type-specs">11px / 500 / 0.05em</span></div><p class="type-sample text-stat-lbl">ACTIVE DEPLOYMENTS</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Components -->
+    <section class="section" id="components">
+      <div class="container">
+        <div class="section-header" data-animate>
+          <p class="section-eyebrow">03 / Components</p>
+          <h2 class="section-title">UI Library</h2>
+          <p class="section-desc">Production-ready components built exclusively from the 12 canonical swatches.</p>
+        </div>
+
+        <h3 class="subsection-title" data-animate>Buttons</h3>
+        <div class="component-row" data-animate>
+          <button class="btn btn-primary">Submit</button>
+          <button class="btn btn-cyan">Get Started</button>
+          <button class="btn btn-secondary">Learn More</button>
+          <button class="btn btn-ghost">Ghost Link →</button>
+          <button class="btn btn-primary" disabled>Disabled</button>
+        </div>
+
+        <h3 class="subsection-title" data-animate>Status Badges</h3>
+        <div class="component-row" data-animate>
+          <span class="badge badge--success">● Operational</span>
+          <span class="badge badge--warning">● In Progress</span>
+          <span class="badge badge--error">● Critical</span>
+          <span class="badge badge--gold">● Highlighted</span>
+          <span class="badge badge--info">● Processing</span>
+        </div>
+
+        <h3 class="subsection-title" data-animate>Service Cards</h3>
+        <div class="card-grid" data-animate>
+          <div class="card">
+            <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00B0BD" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <h4 class="card-title">Secure by Design</h4>
+            <p class="card-desc">Comprehensive cyber-resilient ecosystem protecting critical digital infrastructure against evolving threats.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00B0BD" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></div>
+            <h4 class="card-title">Intelligence at Scale</h4>
+            <p class="card-desc">Sovereign AI initiative developing advanced digital offerings for holistic security and defense operations.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00B0BD" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+            <h4 class="card-title">Sovereign by Choice</h4>
+            <p class="card-desc">Strategic technology solutions ensuring autonomous control over critical national data and digital assets.</p>
+          </div>
+        </div>
+
+        <h3 class="subsection-title" data-animate>Glass Cards (KPI)</h3>
+        <div class="card-grid card-grid--kpi" data-animate>
+          <div class="glass-card">
+            <p class="kpi-label">TOTAL DEPLOYMENTS</p>
+            <p class="kpi-value" data-count="847">0</p>
+            <span class="badge badge--success">● ▲ +12% vs target</span>
+          </div>
+          <div class="glass-card">
+            <p class="kpi-label">BRAND COMPLIANCE</p>
+            <p class="kpi-value" data-count="99" data-suffix="%">0%</p>
+            <span class="badge badge--success">● WCAG AA Pass</span>
+          </div>
+          <div class="glass-card">
+            <p class="kpi-label">AVG LOAD TIME</p>
+            <p class="kpi-value" data-count="301" data-suffix="ms">0ms</p>
+            <span class="badge badge--success">● Under 500ms</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Forms (Light Mode Section) -->
+    <section class="section section--light" id="forms">
+      <div class="container">
+        <div class="section-header" data-animate>
+          <p class="section-eyebrow section-eyebrow--light">04 / Forms</p>
+          <h2 class="section-title section-title--light">Contact Form</h2>
+          <p class="section-desc section-desc--light">Indra-style underline inputs on off-white background.</p>
+        </div>
+        <div class="form-layout" data-animate>
+          <div class="form-intro">
+            <p class="form-eyebrow">Contact us</p>
+            <h3 class="form-heading">Interested in<br><span class="text-cyan">IndraMind's</span> potential?</h3>
+          </div>
+          <form class="form-grid" id="contactForm">
+            <div class="form-field"><label class="form-label" for="firstName">First Name *</label><input class="form-input" type="text" id="firstName" placeholder="First Name" required></div>
+            <div class="form-field"><label class="form-label" for="lastName">Last Name</label><input class="form-input" type="text" id="lastName" placeholder="Last Name"></div>
+            <div class="form-field"><label class="form-label" for="country">Country *</label><select class="form-input form-select" id="country" required><option value="">- Select -</option><option>Brazil</option><option>United States</option><option>Spain</option><option>Germany</option></select></div>
+            <div class="form-field"><label class="form-label" for="company">Company</label><input class="form-input" type="text" id="company" placeholder="Company"></div>
+            <div class="form-field"><label class="form-label" for="email">Email *</label><input class="form-input" type="email" id="email" placeholder="Email" required></div>
+            <div class="form-field"><label class="form-label" for="phone">Phone</label><input class="form-input" type="tel" id="phone" placeholder="Phone"></div>
+            <div class="form-field form-field--full"><label class="form-label" for="message">Message *</label><textarea class="form-input form-textarea" id="message" placeholder="Message" rows="4" required></textarea></div>
+            <div class="form-field form-field--full"><button type="submit" class="btn btn-cyan btn--form">Send Message</button></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer: gradient from --indra-deep to --indra-primary -->
+    <footer class="footer">
+      <div class="container footer-content">
+        <div class="footer-brand">
+          <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 2L2 8l12 6 12-6-12-6z" stroke="#00B0BD" stroke-width="1.5" fill="none"/><path d="M2 20l12 6 12-6" stroke="#00B0BD" stroke-width="1.5" fill="none"/><path d="M2 14l12 6 12-6" stroke="#00B0BD" stroke-width="1.5" fill="none"/></svg>
+          <span>DSS Universal Standard v3.0.0 · <span class="footer-accent">future</span> by design</span>
+        </div>
+        <p class="footer-copy">DSS-INDRAMIND-2026-001 · Stitch: projects/11889709839974860769</p>
+      </div>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

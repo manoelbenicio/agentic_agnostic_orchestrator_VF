@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HerdMaster — Arquitetura (Consolidado)</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#111827; --panel2:#0f1623; --border:#1f2a3a;
+    --txt:#e5e7eb; --muted:#94a3b8; --accent:#3b82f6; --accent2:#22d3ee;
+    --green:#22c55e; --red:#ef4444; --purple:#a855f7; --amber:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex; height:100vh; overflow:hidden;
+  }
+  /* Sidebar */
+  aside{
+    width:280px; flex-shrink:0; background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border-right:1px solid var(--border); display:flex; flex-direction:column; padding:0;
+  }
+  .brand{padding:22px 20px 16px;border-bottom:1px solid var(--border)}
+  .brand h1{font-size:20px;margin:0;letter-spacing:.5px}
+  .brand .v{color:var(--accent2);font-weight:700}
+  .brand p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+  nav{padding:14px 12px;flex:1;overflow-y:auto}
+  .nav-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:8px 10px}
+  button.navitem{
+    width:100%;text-align:left;background:transparent;color:var(--txt);border:1px solid transparent;
+    border-radius:10px;padding:12px 14px;margin:4px 0;cursor:pointer;font-size:14px;
+    display:flex;align-items:flex-start;gap:10px;transition:all .15s;
+  }
+  button.navitem:hover{background:#16203200;background:#162032;border-color:var(--border)}
+  button.navitem.active{background:#13233f;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .navitem .dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0}
+  .navitem .t{font-weight:600}
+  .navitem .d{color:var(--muted);font-size:11.5px;margin-top:3px;line-height:1.4}
+  .legend{padding:14px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+  .legend .row{display:flex;align-items:center;gap:8px;margin:5px 0}
+  .legend .sw{width:12px;height:12px;border-radius:3px}
+  footer{padding:12px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+  /* Main */
+  main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{
+    height:54px;flex-shrink:0;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--panel2);
+  }
+  .topbar .title{font-size:15px;font-weight:600}
+  .topbar .sub{color:var(--muted);font-size:12px}
+  .frame-wrap{flex:1;min-height:0;position:relative;background:#070b12}
+  iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .hint{position:absolute;bottom:14px;right:18px;background:#0f1623cc;border:1px solid var(--border);
+    border-radius:8px;padding:8px 12px;font-size:11px;color:var(--muted);backdrop-filter:blur(4px)}
+</style>
+</head>
+<body>
+  <aside>
+    <div class="brand">
+      <h1>HerdMaster <span class="v">v1.0.0</span></h1>
+      <p>Plano de controle de orquestração multi-agente sobre o Herdr. Diagramas de arquitetura.</p>
+    </div>
+    <nav>
+      <div class="nav-label">Visões de Arquitetura</div>
+      <button class="navitem active" data-src="architecture_macro.html"
+              data-title="Visão MACRO" data-sub="Bird's eye — HerdMaster ↔ Herdr ↔ Agentes">
+        <span class="dot" style="background:var(--accent)"></span>
+        <span><span class="t">1 · Macro</span><span class="d">Visão geral do sistema, nós animados e fluxos de dados</span></span>
+      </button>
+      <button class="navitem" data-src="architecture_micro.html"
+              data-title="Visão MICRO" data-sub="Internals de cada componente">
+        <span class="dot" style="background:var(--accent2)"></span>
+        <span><span class="t">2 · Micro</span><span class="d">Estrutura interna: bus, fila, watchdog, projeto, ACL</span></span>
+      </button>
+      <button class="navitem" data-src="architecture_deep.html"
+              data-title="Visão DEEP" data-sub="Sequências animadas + ER do SQLite">
+        <span class="dot" style="background:var(--purple)"></span>
+        <span><span class="t">3 · Deep</span><span class="d">Fluxos: ciclo de vida, watchdog, fallback + ER</span></span>
+      </button>
+    </nav>
+    <div class="legend">
+      <div style="font-weight:600;color:var(--txt);margin-bottom:6px">Subsistemas (cores)</div>
+      <div class="row"><span class="sw" style="background:var(--accent)"></span> Message Bus</div>
+      <div class="row"><span class="sw" style="background:var(--red)"></span> Watchdog</div>
+      <div class="row"><span class="sw" style="background:var(--green)"></span> Dispatch / Fila</div>
+      <div class="row"><span class="sw" style="background:var(--purple)"></span> Project Mode</div>
+      <div class="row"><span class="sw" style="background:var(--amber)"></span> ACL</div>
+    </div>
+    <footer>© HerdMaster — 80 testes verdes · 11 subsistemas</footer>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <div class="title" id="viewTitle">Visão MACRO</div>
+        <div class="sub" id="viewSub">Bird's eye — HerdMaster ↔ Herdr ↔ Agentes</div>
+      </div>
+      <div class="sub">Diagramas autocontidos · offline</div>
+    </div>
+    <div class="frame-wrap">
+      <iframe id="frame" src="architecture_macro.html" title="Diagrama de arquitetura"></iframe>
+      <div class="hint">Dica: use 1 / 2 / 3 no teclado para alternar as visões</div>
+    </div>
+  </main>
+
+<script>
+  const items = Array.from(document.querySelectorAll('.navitem'));
+  const frame = document.getElementById('frame');
+  const titleEl = document.getElementById('viewTitle');
+  const subEl = document.getElementById('viewSub');
+
+  function activate(item){
+    items.forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    const src = item.getAttribute('data-src');
+    if(frame.getAttribute('src') !== src){ frame.setAttribute('src', src); }
+    titleEl.textContent = item.getAttribute('data-title');
+    subEl.textContent = item.getAttribute('data-sub');
+  }
+  items.forEach(item => item.addEventListener('click', ()=>activate(item)));
+  // Keyboard shortcuts 1/2/3
+  window.addEventListener('keydown', (e)=>{
+    if(e.key==='1') activate(items[0]);
+    if(e.key==='2') activate(items[1]);
+    if(e.key==='3') activate(items[2]);
+  });
+</script>
+</body>
+</html>

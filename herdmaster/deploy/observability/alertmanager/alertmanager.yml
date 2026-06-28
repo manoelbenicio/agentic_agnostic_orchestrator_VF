@@ -1,0 +1,70 @@
+global:
+  resolve_timeout: 1m
+  # Grouping: consolida alertas do mesmo componente para evitar flood
+  smtp_smarthost: ''  # não configurado — usar webhook
+  smtp_from: ''
+
+route:
+  group_by: ['component', 'severity']
+  group_wait: 5s        # aguarda 5s para agrupar alertas relacionados
+  group_interval: 30s   # reenvia a cada 30s enquanto FIRING
+  repeat_interval: 5m   # renotifica a cada 5min
+
+  # Rota raiz: notificação geral
+  receiver: 'default-log'
+
+  routes:
+    # Auto-remediation: agentes fora da whitelist → webhook executa purge imediato
+    - matchers:
+        - remediation="auto"
+        - component="agent_registry"
+      receiver: 'auto-remediation-webhook'
+      group_wait: 5s
+      repeat_interval: 2m   # tenta novamente a cada 2min se persistir
+      continue: false        # não propaga para outros receivers
+
+    # Critical: além do log, envia para receiver de escalação (ex: futuro Slack)
+    - matchers:
+        - severity="critical"
+      receiver: 'critical-log'
+      continue: true
+
+receivers:
+  # Receiver padrão: apenas loga (webhook local no mesmo host)
+  - name: 'default-log'
+    webhook_configs:
+      - url: 'http://localhost:9099/webhook/log'
+        send_resolved: true
+        http_config:
+          follow_redirects: true
+
+  # Auto-remediation: executa o purge de agentes fantasmas
+  - name: 'auto-remediation-webhook'
+    webhook_configs:
+      - url: 'http://localhost:9099/webhook/remediate'
+        send_resolved: true
+        http_config:
+          follow_redirects: true
+        max_alerts: 10
+        # O webhook server valida a origem antes de executar qualquer ação
+
+  # Critical: log + (futuro: Slack/PagerDuty)
+  - name: 'critical-log'
+    webhook_configs:
+      - url: 'http://localhost:9099/webhook/critical'
+        send_resolved: true
+
+inhibit_rules:
+  # Se HerdMaster está DOWN, suprimir alertas de agentes (são consequência)
+  - source_matchers:
+      - alertname="HerdMasterDown"
+    target_matchers:
+      - component="agent_registry"
+    equal: []
+
+  # Se WhitelistComplianceViolation está FIRING, UnlistedAgentsDetected é redundante
+  - source_matchers:
+      - alertname="WhitelistComplianceViolation"
+    target_matchers:
+      - alertname="AgentCountMismatch"
+    equal: ['component']

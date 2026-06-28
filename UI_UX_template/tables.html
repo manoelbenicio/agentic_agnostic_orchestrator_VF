@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PortalShift Intelligence — Deployment Registry with real-time status tracking and compliance monitoring.">
+  <title>Deployment Registry | PortalShift Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* === TABLE PAGE LAYOUT === */
+    .table-shell { display: flex; min-height: 100vh; }
+    .table-sidebar {
+      width: 64px; background: var(--indra-deep-navy);
+      border-right: 1px solid var(--indra-border); display: flex;
+      flex-direction: column; align-items: center; padding: 16px 0; gap: 28px;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    }
+    .table-sidebar .logo-mark {
+      width: 36px; height: 36px; background: var(--indra-cyan);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: var(--indra-deep-navy);
+      margin-bottom: 16px;
+    }
+    .table-sidebar .nav-icon {
+      width: 40px; height: 40px; display: flex; align-items: center;
+      justify-content: center; color: var(--indra-muted-teal);
+      cursor: pointer; transition: all 0.2s; position: relative; text-decoration: none;
+    }
+    .table-sidebar .nav-icon:hover, .table-sidebar .nav-icon.active { color: var(--indra-cyan); }
+    .table-sidebar .nav-icon.active::before {
+      content: ''; position: absolute; left: -12px; top: 8px;
+      width: 3px; height: 24px; background: var(--indra-cyan);
+    }
+    .table-sidebar svg { width: 22px; height: 22px; }
+    .table-main { margin-left: 64px; flex: 1; }
+
+    /* Top bar */
+    .table-topbar {
+      height: 56px; background: var(--indra-deep-navy);
+      border-bottom: 1px solid var(--indra-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; position: sticky; top: 0; z-index: 50;
+    }
+    .table-topbar h1 { font-size: 16px; font-weight: 600; color: var(--indra-white); }
+    .table-topbar .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--indra-card-surface); border: 2px solid var(--indra-cyan);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: var(--indra-cyan);
+    }
+
+    .table-content { padding: 24px 32px; }
+
+    /* Page Header */
+    .page-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 16px;
+    }
+    .page-header h2 { font-size: 24px; font-weight: 600; color: var(--indra-white); }
+    .header-controls { display: flex; align-items: center; gap: 12px; }
+
+    /* Search */
+    .search-input {
+      background: transparent; border: none; border-bottom: 2px solid var(--indra-muted-teal);
+      color: var(--indra-white); font-family: 'Inter', sans-serif; font-size: 14px;
+      padding: 8px 12px 8px 32px; width: 240px; outline: none; transition: border-color 0.2s;
+    }
+    .search-input:focus { border-bottom-color: var(--indra-cyan); }
+    .search-input::placeholder { color: var(--indra-muted-teal); }
+    .search-wrap { position: relative; }
+    .search-wrap svg {
+      position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; color: var(--indra-muted-teal);
+    }
+
+    /* Filter select */
+    .filter-select {
+      background: var(--indra-card-surface); border: 1px solid var(--indra-border);
+      color: var(--indra-light-teal); font-family: 'Inter', sans-serif; font-size: 13px;
+      padding: 8px 28px 8px 12px; border-radius: 0; outline: none;
+      appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%237A9CAE' stroke-width='1.5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+    }
+    .filter-select:focus { border-color: var(--indra-cyan); }
+
+    /* Bulk Actions */
+    .bulk-bar {
+      background: rgba(0,176,189,0.08); border: 1px solid rgba(0,176,189,0.2);
+      padding: 10px 16px; display: flex; align-items: center; gap: 16px;
+      margin-bottom: 0; border-radius: 0; font-size: 13px; color: var(--indra-light-teal);
+    }
+    .bulk-bar .count { color: var(--indra-cyan); font-weight: 600; }
+    .bulk-bar button {
+      background: transparent; border: 1px solid var(--indra-cyan); color: var(--indra-cyan);
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+      padding: 5px 14px; border-radius: 0; cursor: pointer; transition: all 0.2s;
+    }
+    .bulk-bar button:hover { background: var(--indra-cyan); color: var(--indra-deep-navy); }
+    .bulk-bar button.danger { border-color: var(--indra-error); color: var(--indra-error); }
+    .bulk-bar button.danger:hover { background: var(--indra-error); color: #fff; }
+
+    /* Table Container */
+    .table-container {
+      background: var(--indra-card-surface); border: 1px solid var(--indra-border);
+      border-radius: 8px; overflow: hidden;
+    }
+
+    /* Data Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table thead th {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--indra-muted-teal);
+      padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--indra-border);
+      background: var(--indra-card-surface); user-select: none; cursor: pointer;
+    }
+    .data-table thead th:hover { color: var(--indra-cyan); }
+    .data-table tbody tr { transition: background 0.15s; }
+    .data-table tbody tr:nth-child(odd) { background: var(--indra-deep-navy); }
+    .data-table tbody tr:nth-child(even) { background: var(--indra-card-surface); }
+    .data-table tbody tr:hover { background: rgba(0,176,189,0.06); }
+    .data-table tbody td {
+      padding: 12px 16px; font-size: 14px; color: var(--indra-light-teal);
+      border-bottom: 1px solid rgba(179,193,218,0.06);
+    }
+    .data-table .col-id {
+      font-family: 'Space Grotesk', monospace; font-size: 13px; font-weight: 500;
+      color: var(--indra-muted-teal); background: rgba(0,43,58,0.5);
+      padding: 2px 8px; border-radius: 2px; display: inline-block;
+    }
+    .data-table .col-name { color: var(--indra-white); font-weight: 500; }
+    .data-table .col-env {
+      font-size: 12px; padding: 3px 10px; border-radius: 9999px;
+      display: inline-block; font-weight: 500;
+    }
+    .col-env.prod { color: var(--indra-cyan); background: rgba(0,176,189,0.1); }
+    .col-env.staging { color: var(--indra-warning); background: rgba(255,152,0,0.1); }
+    .col-env.dev { color: var(--indra-muted-teal); background: rgba(122,156,174,0.1); }
+
+    /* Status Badges */
+    .tbl-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; padding: 3px 10px;
+      border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    .tbl-status::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+    }
+    .tbl-status.success { color: var(--indra-success); background: rgba(39,174,96,0.12); }
+    .tbl-status.warning { color: var(--indra-warning); background: rgba(255,152,0,0.12); }
+    .tbl-status.error { color: var(--indra-error); background: rgba(233,30,99,0.12); }
+
+    /* Checkbox */
+    .tbl-check {
+      width: 16px; height: 16px; accent-color: var(--indra-cyan);
+      cursor: pointer; border-radius: 0;
+    }
+
+    /* Date & Owner */
+    .col-date { font-size: 13px; color: var(--indra-muted-teal); font-feature-settings: 'tnum'; }
+    .col-owner { font-size: 13px; }
+
+    /* Pagination */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-top: 1px solid var(--indra-border);
+      background: var(--indra-card-surface);
+    }
+    .pagination .info { font-size: 13px; color: var(--indra-muted-teal); }
+    .pagination .pages { display: flex; gap: 4px; }
+    .pagination .page-btn {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      background: transparent; border: 1px solid var(--indra-border);
+      color: var(--indra-muted-teal); font-size: 13px; font-family: 'Inter', sans-serif;
+      cursor: pointer; border-radius: 0; transition: all 0.2s;
+    }
+    .pagination .page-btn:hover { border-color: var(--indra-cyan); color: var(--indra-cyan); }
+    .pagination .page-btn.active {
+      background: var(--indra-cyan); border-color: var(--indra-cyan);
+      color: var(--indra-deep-navy); font-weight: 600;
+    }
+
+    @media (max-width: 1024px) {
+      .table-container { overflow-x: auto; }
+      .data-table { min-width: 900px; }
+    }
+    @media (max-width: 768px) {
+      .table-sidebar { display: none; }
+      .table-main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="table-shell">
+    <!-- Sidebar (shared pattern) -->
+    <nav class="table-sidebar" aria-label="Main navigation">
+      <div class="logo-mark">PS</div>
+      <a class="nav-icon" href="dashboard.html" title="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </a>
+      <div class="nav-icon active" title="Deployment Registry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </div>
+      <a class="nav-icon" href="modals.html" title="Components">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg>
+      </a>
+      <a class="nav-icon" href="index.html" title="Design System">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      </a>
+    </nav>
+
+    <div class="table-main">
+      <header class="table-topbar">
+        <h1>PortalShift Intelligence</h1>
+        <div class="avatar" title="Ricardo Mendes">RM</div>
+      </header>
+
+      <main class="table-content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h2>Deployment Registry</h2>
+          <div class="header-controls">
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="search" class="search-input" id="searchInput" placeholder="Search deployments…" aria-label="Search deployments">
+            </div>
+            <select class="filter-select" id="envFilter" aria-label="Filter by environment">
+              <option value="all">All Environments</option>
+              <option value="production">Production</option>
+              <option value="staging">Staging</option>
+              <option value="development">Development</option>
+            </select>
+            <select class="filter-select" id="statusFilter" aria-label="Filter by status">
+              <option value="all">All Status</option>
+              <option value="success">Success</option>
+              <option value="warning">Warning</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Bulk Actions Bar -->
+        <div class="bulk-bar" id="bulkBar" style="display:none">
+          <span><span class="count" id="selectedCount">0</span> items selected</span>
+          <button id="bulkExport">Export Selected</button>
+          <button id="bulkRollback">Rollback</button>
+          <button class="danger" id="bulkDelete">Delete</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <table class="data-table" id="deployTable">
+            <thead>
+              <tr>
+                <th style="width:40px"><input type="checkbox" class="tbl-check" id="selectAll" aria-label="Select all rows"></th>
+                <th>ID</th>
+                <th>Project Name</th>
+                <th>Environment</th>
+                <th>Status</th>
+                <th>Deploy Date</th>
+                <th>Owner</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td><input type="checkbox" class="tbl-check row-check"></td>
+                <td><span class="col-id">DEP-8847</span></td>
+                <td class="col-name">PortalShift Login v4.2.1</td>
+                <td><span class="col-env prod">Production</span></td>
+                <td><span class="tbl-status success">Deployed</span></td>
+                <td class="col-date">2026-04-28 14:23</td>
+                <td class="col-owner">Ana Torres</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check row-check"></td>
+                <td><span class="col-id">DEP-8846</span></td>
+                <td class="col-name">DSS Token CDN v3.0.1</td>
+                <td><span class="col-env prod">Production</span></td>
+                <td><span class="tbl-status success">Deployed</span></td>
+                <td class="col-date">2026-04-28 10:41</td>
+                <td class="col-owner">Carlos Ribeiro</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check row-check"></td>
+                <td><span class="col-id">DEP-8845</span></td>
+                <td class="col-name">API Gateway — US-East</td>
+                <td><span class="col-env prod">Production</span></td>
+                <td><span class="tbl-status warning">Degraded</span></td>
+                <td class="col-date">2026-04-27 22:15</td>
+                <td class="col-owner">Marta Vieira</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check row-check"></td>
+                <td><span class="col-id">DEP-8844</span></td>
+                <td class="col-name">Minsait Portal Rebrand</td>
+                <td><span class="col-env staging">Staging</span></td>
+                <td><span class="tbl-status error">Failed</span></td>
+                <td class="col-date">2026-04-27 17:08</td>
+                <td class="col-owner">Lucas Ferreira</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check row-check"></td>
+                <td><span class="col-id">DEP-8843</span></td>
+                <td class="col-name">Analytics Engine v2.9</td>
+                <td><span class="col-env prod">Production</span></td>
+                <td><span class="tbl-status success">Deployed</span></td>
+                <td class="col-date">2026-04-27 09:30</td>
+                <td class="col-owner">Sofia Almeida</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check row-check"></td>
+                <td><span class="col-id">DEP-8842</span></td>
+                <td class="col-name">Gestão Férias MVP QA Bot</td>
+                <td><span class="col-env staging">Staging</span></td>
+                <td><span class="tbl-status success">Deployed</span></td>
+                <td class="col-date">2026-04-26 16:55</td>
+                <td class="col-owner">Ricardo Mendes</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check row-check"></td>
+                <td><span class="col-id">DEP-8841</span></td>
+                <td class="col-name">Notification Service v1.4</td>
+                <td><span class="col-env dev">Development</span></td>
+                <td><span class="tbl-status success">Deployed</span></td>
+                <td class="col-date">2026-04-26 11:20</td>
+                <td class="col-owner">Pedro Santos</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="tbl-check row-check"></td>
+                <td><span class="col-id">DEP-8840</span></td>
+                <td class="col-name">CI/CD Pipeline Upgrade</td>
+                <td><span class="col-env prod">Production</span></td>
+                <td><span class="tbl-status success">Deployed</span></td>
+                <td class="col-date">2026-04-25 08:44</td>
+                <td class="col-owner">Ana Torres</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <div class="info">Showing 1–8 of 847 deployments</div>
+            <div class="pages">
+              <button class="page-btn" aria-label="Previous page">‹</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <button class="page-btn">…</button>
+              <button class="page-btn">106</button>
+              <button class="page-btn" aria-label="Next page">›</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // === SELECT ALL / BULK ACTIONS ===
+    const selectAll = document.getElementById('selectAll');
+    const rowChecks = document.querySelectorAll('.row-check');
+    const bulkBar = document.getElementById('bulkBar');
+    const selectedCount = document.getElementById('selectedCount');
+
+    function updateBulkBar() {
+      const checked = document.querySelectorAll('.row-check:checked').length;
+      selectedCount.textContent = checked;
+      bulkBar.style.display = checked > 0 ? 'flex' : 'none';
+    }
+
+    selectAll.addEventListener('change', () => {
+      rowChecks.forEach(cb => cb.checked = selectAll.checked);
+      updateBulkBar();
+    });
+    rowChecks.forEach(cb => cb.addEventListener('change', updateBulkBar));
+
+    // === SEARCH FILTER ===
+    document.getElementById('searchInput').addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('#tableBody tr').forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+
+    // === ENV FILTER ===
+    document.getElementById('envFilter').addEventListener('change', function() {
+      const v = this.value;
+      document.querySelectorAll('#tableBody tr').forEach(row => {
+        if (v === 'all') { row.style.display = ''; return; }
+        const env = row.querySelector('.col-env')?.textContent.toLowerCase() || '';
+        row.style.display = env.includes(v) ? '' : 'none';
+      });
+    });
+
+    // === STATUS FILTER ===
+    document.getElementById('statusFilter').addEventListener('change', function() {
+      const v = this.value;
+      document.querySelectorAll('#tableBody tr').forEach(row => {
+        if (v === 'all') { row.style.display = ''; return; }
+        const badge = row.querySelector('.tbl-status');
+        if (!badge) { row.style.display = 'none'; return; }
+        const match = badge.classList.contains(v) || badge.textContent.toLowerCase().includes(v);
+        row.style.display = match ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

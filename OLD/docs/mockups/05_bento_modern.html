@@ -1,0 +1,43 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layout 5 — Bento Moderno</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef0f5;--card:#fff;--text:#15171f;--muted:#6c7486;--bd:#e9ebf1;--pri:#5b5bf0;--priw:#edecfe;--acc:#ff7a59;--ok:#16a34a;--warn:#e0890a;--err:#e23b3b;--sh:0 2px 4px rgba(20,22,35,.04),0 12px 28px rgba(20,22,35,.07)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:
+ radial-gradient(1200px 500px at 80% -10%, #e6e3ff 0, transparent 60%),
+ radial-gradient(900px 500px at -10% 10%, #ffe9e1 0, transparent 55%), var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+.mono{font-family:"JetBrains Mono",monospace}
+.wrap{max-width:1180px;margin:0 auto;padding:22px}
+.bar{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid #fff;border-radius:18px;padding:12px 18px;box-shadow:var(--sh)}
+.lg{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--pri),var(--acc));color:#fff;display:grid;place-items:center;font-weight:800}
+.bar b{font-weight:700}.chips{display:flex;gap:6px;margin-left:14px}.chip{padding:7px 13px;border-radius:11px;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer}.chip.on{background:#fff;color:var(--text);box-shadow:var(--sh)}
+.bar .sp{flex:1}.pill{display:inline-flex;gap:6px;align-items:center;background:#e7f6ed;color:var(--ok);font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px}
+.av{width:34px;height:34px;border-radius:11px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:800}
+.head{margin:26px 4px 18px}.h1{font-size:30px;font-weight:800;letter-spacing:-.025em;margin:0}.sub{color:var(--muted);margin:6px 0 0}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.b{background:var(--card);border:1px solid #fff;border-radius:22px;box-shadow:var(--sh);padding:22px}
+.b.x2{grid-column:span 2}.b.tall{grid-row:span 2}
+.k{font-size:13px;color:var(--muted);font-weight:500}.v{font-size:38px;font-weight:800;letter-spacing:-.03em;margin-top:10px}.d{font-size:12px;font-weight:600;color:var(--ok);margin-top:6px}
+.ring{width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--pri) 0 144deg,var(--priw) 144deg 360deg);display:grid;place-items:center;margin:6px auto}
+.ring i{width:70px;height:70px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:800;font-size:20px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd)}.row:last-child{border:0}
+.ic{width:34px;height:34px;border-radius:11px;color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+.st{width:9px;height:9px;border-radius:50%;margin-left:auto}.tag{font-size:11px;font-weight:700;padding:4px 11px;border-radius:999px;background:var(--priw);color:var(--pri)}
+.btn{height:40px;padding:0 18px;border-radius:13px;border:0;background:var(--pri);color:#fff;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 8px 18px rgba(91,91,240,.28)}
+.spark{height:60px;display:flex;align-items:flex-end;gap:6px;margin-top:12px}.spark i{flex:1;background:linear-gradient(var(--pri),var(--priw));border-radius:6px}
+</style></head><body><div class="wrap">
+<div class="bar"><div class="lg">◧</div><b>AOP</b>
+<div class="chips"><span class="chip on">Dashboard</span><span class="chip">Projects</span><span class="chip">Issues</span><span class="chip">Squad</span><span class="chip">FinOps</span></div>
+<div class="sp"></div><div class="mono" style="color:var(--muted)">⌘K Buscar</div><span class="pill">● API ok</span><div class="av">M</div></div>
+<div class="head"><h1 class="h1">Bom dia, Manoel 👋</h1><p class="sub">Layout 5 · Bento moderno e arejado — visão premium do workspace tenant-a.</p></div>
+<div class="bento">
+<div class="b"><div class="k">Agentes ativos</div><div class="v">9</div><div class="d">▲ 2 vs ontem</div></div>
+<div class="b"><div class="k">Tasks (24h)</div><div class="v">128</div><div class="d">▲ 18%</div></div>
+<div class="b tall"><div class="k">Utilização de seats</div><div class="ring"><i>40%</i></div><div style="text-align:center;color:var(--muted);font-size:13px">6 de 15 seats</div>
+<div style="margin-top:14px;display:flex;flex-direction:column;gap:8px"><span class="tag" style="background:#eef0f3;color:var(--muted)">5× Codex</span><span class="tag" style="background:#eef0f3;color:var(--muted)">5× Antigravity</span><span class="tag" style="background:#eef0f3;color:var(--muted)">5× Kiro</span></div></div>
+<div class="b"><div class="k">Custo (24h)</div><div class="v" style="font-size:30px">$42<span style="font-size:18px;color:var(--muted)">.18</span></div><div class="spark"><i style="height:40%"></i><i style="height:62%"></i><i style="height:50%"></i><i style="height:86%"></i><i style="height:70%"></i><i style="height:96%"></i></div></div>
+<div class="b x2"><div style="display:flex;justify-content:space-between;align-items:center"><div class="k" style="font-size:15px;font-weight:700;color:var(--text)">Agentes</div><button class="btn" style="height:34px;font-size:13px">+ Nova Task</button></div>
+<div class="row"><div class="ic" style="background:#5b5bf0">K</div><div><b>Kiro_Opus-48</b><div style="color:var(--muted);font-size:12px">Kiro · orchestrator</div></div><span class="tag" style="margin-left:auto">Tech-Lead</span><span class="st" style="background:var(--warn)"></span></div>
+<div class="row"><div class="ic" style="background:#16a34a">C</div><div><b>Codex #1</b><div style="color:var(--muted);font-size:12px">OpenAI · worker</div></div><span class="st" style="background:var(--ok)"></span></div>
+<div class="row"><div class="ic" style="background:#ff7a59">G</div><div><b>Gemini Flash</b><div style="color:var(--muted);font-size:12px">Google · worker</div></div><span class="st" style="background:var(--err)"></span></div></div>
+</div></div></body></html>

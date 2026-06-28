@@ -22,10 +22,26 @@ def _database_url() -> str:
             continue
         key, value = line.split("=", 1)
         values[key] = value
+    postgres_port = os.environ.get("POSTGRES_PORT") or values.get("POSTGRES_PORT") or "5432"
     return (
         f"postgresql://{values['POSTGRES_USER']}:{values['POSTGRES_PASSWORD']}"
-        f"@127.0.0.1:5432/{values['POSTGRES_DB']}"
+        f"@127.0.0.1:{postgres_port}/{values['POSTGRES_DB']}"
     )
+
+
+def _redis_url() -> str:
+    env_path = Path(__file__).resolve().parents[3] / "deploy" / ".env"
+    values: dict[str, str] = {}
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key] = value
+    redis_port = os.environ.get("REDIS_PORT") or values.get("REDIS_PORT") or "6379"
+    redis_password = os.environ.get("REDIS_PASSWORD") or values.get("REDIS_PASSWORD") or ""
+    if redis_password:
+        return f"redis://:{redis_password}@127.0.0.1:{redis_port}/0"
+    return f"redis://127.0.0.1:{redis_port}/0"
 
 
 def _client(monkeypatch, *, device_login_commands: dict[str, str] | None = None):
@@ -43,7 +59,7 @@ def _client(monkeypatch, *, device_login_commands: dict[str, str] | None = None)
 
     settings = Settings(
         database_url=database_url,
-        redis_url=os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/0"),
+        redis_url=os.environ.get("REDIS_URL") or _redis_url(),
         host="127.0.0.1",
         port=8090,
         device_login_commands_json=json.dumps(device_login_commands or {}),

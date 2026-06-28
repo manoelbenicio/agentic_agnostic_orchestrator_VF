@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HerdMaster Architecture - Observability (AS-IS vs TO-BE)</title>
+  <style>
+    /* Native Customer Design System Palette (STRICT HEXADECIMAL COMPLIANCE) */
+    :root {
+      color-scheme: dark;
+      --bg: #080b10;
+      --panel: #101722;
+      --panel-2: #121d2b;
+      --text: #e8eef7;
+      --muted: #91a4bb;
+      --line: #314257;
+      
+      /* Semantic/Node Colors */
+      --bus: #4aa3ff;
+      --watchdog: #ff5c7a;
+      --dispatch: #36d399;
+      --project: #f8c14a;
+      --acl: #c084fc;
+      --api: #22d3ee;
+      --db: #f97316;
+      --herdr: #a3e635;
+      
+      --status-critical: #ff5c7a;
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(74, 163, 255, .18), transparent 30%),
+        radial-gradient(circle at 82% 28%, rgba(54, 211, 153, .12), transparent 28%),
+        linear-gradient(135deg, #070910 0%, #0b1017 46%, #0a0d13 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      padding: 24px clamp(18px, 4vw, 48px) 12px;
+      border-bottom: 1px solid rgba(145, 164, 187, .18);
+    }
+    
+    h1 { 
+      margin: 0; 
+      font-size: clamp(26px, 4vw, 48px); 
+      letter-spacing: 0; 
+    }
+    
+    .subtitle { 
+      color: var(--muted); 
+      margin: 10px 0 0; 
+      max-width: 980px; 
+      line-height: 1.55; 
+    }
+    
+    main {
+      flex: 1;
+      padding: 18px clamp(14px, 3vw, 34px) 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      max-width: 1800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    
+    .stage {
+      background: linear-gradient(180deg, rgba(16, 23, 34, .92), rgba(10, 15, 22, .94));
+      border: 1px solid rgba(145, 164, 187, .2);
+      border-radius: 8px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .34);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .stage:nth-child(2) { animation-delay: 0.15s; }
+    
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .panel-header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(145, 164, 187, .18);
+      padding-bottom: 16px;
+    }
+    
+    .stage h2 { 
+      margin: 0; 
+      font-size: 21px; 
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .badge {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 800;
+    }
+    
+    .badge.asis { background: rgba(248, 193, 74, 0.15); color: var(--project); border: 1px solid rgba(248, 193, 74, 0.3); }
+    .badge.tobe { background: rgba(54, 211, 153, 0.15); color: var(--dispatch); border: 1px solid rgba(54, 211, 153, 0.3); }
+    
+    .svg-container {
+      flex: 1;
+      width: 100%;
+      min-height: 400px;
+    }
+    
+    svg { width: 100%; height: 100%; display: block; }
+    
+    /* SVG Element Styles */
+    .zone {
+      fill: rgba(255, 255, 255, .025);
+      stroke: rgba(145, 164, 187, .18);
+      stroke-width: 1.2;
+      rx: 18;
+    }
+    
+    .zone-title { 
+      fill: var(--muted); 
+      font-size: 14px; 
+      font-weight: 700; 
+      letter-spacing: .08em; 
+      text-transform: uppercase; 
+    }
+    
+    .node rect {
+      fill: rgba(18, 29, 43, .94);
+      stroke-width: 2;
+      rx: 10;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+      transition: filter .2s ease, stroke-width .2s ease, transform .2s ease;
+      cursor: pointer;
+    }
+    
+    .node:hover rect {
+      transform: translateY(-2px);
+      stroke-width: 3;
+    }
+    
+    .node text { pointer-events: none; }
+    .node .title { fill: var(--text); font-size: 15px; font-weight: 800; }
+    .node .meta { fill: var(--muted); font-size: 11px; }
+    
+    /* Node Strict Hex Colors */
+    .node.hm rect { stroke: var(--api); --glow: rgba(34, 211, 238, .7); }
+    .node.prom rect { stroke: var(--db); --glow: rgba(249, 115, 22, .7); }
+    .node.graf-empty rect { stroke: var(--muted); stroke-dasharray: 4 4; --glow: rgba(145, 164, 187, .4); }
+    .node.graf-full rect { stroke: var(--dispatch); --glow: rgba(54, 211, 153, .7); }
+    .node.iac rect { stroke: var(--acl); --glow: rgba(192, 132, 252, .7); }
+    
+    .node:hover rect { filter: drop-shadow(0 0 18px var(--glow)); }
+    
+    /* Connections */
+    .flow {
+      fill: none;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      opacity: .86;
+    }
+    
+    .flow.metric { stroke: var(--db); stroke-dasharray: 8 10; animation: flow 1.25s linear infinite; }
+    .flow.iac { stroke: var(--acl); }
+    .flow.manual { stroke: var(--watchdog); stroke-dasharray: 4 4; }
+    
+    @keyframes flow {
+      to { stroke-dashoffset: -18; }
+    }
+    
+    .label-bg { fill: #121d2b; rx: 4; stroke: rgba(145, 164, 187, .18); stroke-width: 1; }
+    .label-text { fill: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .label-text.warn { fill: var(--status-critical); }
+    
+    /* Feature Checklist Table */
+    .feature-list {
+      margin-top: 24px;
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    
+    .feature-list th {
+      text-align: left;
+      padding: 12px 16px;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid rgba(145, 164, 187, .18);
+    }
+    
+    .feature-list td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(145, 164, 187, .05);
+      color: var(--text);
+    }
+    
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      margin-right: 8px;
+    }
+    .dot-red { background: var(--status-critical); box-shadow: 0 0 8px var(--status-critical); }
+    .dot-green { background: var(--dispatch); box-shadow: 0 0 8px var(--dispatch); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>HerdMaster Observability</h1>
+    <div class="subtitle">Architecture Evaluation: Dashboards as Code (FEATURE-REQ-003)</div>
+  </header>
+
+  <main>
+    <!-- AS-IS PANEL -->
+    <div class="stage">
+      <div class="panel-header">
+        <h2><span class="badge asis">AS-IS</span> Current Architecture</h2>
+        <div class="subtitle">Manual configuration, high operational overhead.</div>
+      </div>
+      
+      <div class="svg-container">
+        <svg viewBox="0 0 500 400">
+          <defs>
+            <marker id="arrow-metric" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,1 L8,5 L0,9" fill="none" stroke="#f97316" stroke-width="2" />
+            </marker>
+            <marker id="arrow-manual" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,1 L8,5 L0,9" fill="none" stroke="#ff5c7a" stroke-width="2" />
+            </marker>
+          </defs>
+
+          <!-- Zones -->
+          <rect class="zone" x="20" y="20" width="200" height="340" />
+          <text class="zone-title" x="35" y="45">Control Plane</text>
+          
+          <rect class="zone" x="260" y="20" width="220" height="340" />
+          <text class="zone-title" x="275" y="45">Docker Network</text>
+
+          <!-- Nodes -->
+          <g class="node hm" transform="translate(40, 80)">
+            <rect width="160" height="60" />
+            <text class="title" x="15" y="25">HerdMaster API</text>
+            <text class="meta" x="15" y="45">/metrics endpoint</text>
+          </g>
+
+          <g class="node prom" transform="translate(280, 80)">
+            <rect width="180" height="60" />
+            <text class="title" x="15" y="25">Prometheus</text>
+            <text class="meta" x="15" y="45">Scraping Engine</text>
+          </g>
+
+          <g class="node graf-empty" transform="translate(280, 240)">
+            <rect width="180" height="60" />
+            <text class="title" x="15" y="25">Grafana UI</text>
+            <text class="meta" x="15" y="45">Empty / Unconfigured</text>
+          </g>
+          
+          <g class="node hm" transform="translate(40, 240)">
+            <rect width="160" height="60" />
+            <text class="title" x="15" y="25">Human Operator</text>
+            <text class="meta" x="15" y="45">ClickOps</text>
+          </g>
+
+          <!-- Links -->
+          <!-- Scraping -->
+          <path class="flow metric" d="M280,110 L200,110" marker-end="url(#arrow-metric)" />
+          <rect class="label-bg" x="210" y="98" width="55" height="20" />
+          <text class="label-text" x="215" y="112">Scrape</text>
+
+          <!-- Human Manual Config -->
+          <path class="flow manual" d="M200,270 L280,270" marker-end="url(#arrow-manual)" />
+          <rect class="label-bg" x="210" y="258" width="55" height="20" />
+          <text class="label-text warn" x="214" y="272">Manual</text>
+
+        </svg>
+      </div>
+      
+      <table class="feature-list">
+        <tr>
+          <th>Component</th>
+          <th>Status</th>
+          <th>Day-2 Readiness</th>
+        </tr>
+        <tr>
+          <td>Metrics Exposition</td>
+          <td><span class="status-dot dot-green"></span> Functional</td>
+          <td>Ready</td>
+        </tr>
+        <tr>
+          <td>Dashboard Deployment</td>
+          <td><span class="status-dot dot-red"></span> ClickOps required</td>
+          <td>Fails at scale</td>
+        </tr>
+        <tr>
+          <td>Version Control</td>
+          <td><span class="status-dot dot-red"></span> Unversioned UI</td>
+          <td>High Risk</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- TO-BE PANEL -->
+    <div class="stage">
+      <div class="panel-header">
+        <h2><span class="badge tobe">TO-BE</span> Target Architecture</h2>
+        <div class="subtitle">GitOps driven, Dashboards as Code, C-Level visibility.</div>
+      </div>
+      
+      <div class="svg-container">
+        <svg viewBox="0 0 500 400">
+          <defs>
+            <marker id="arrow-metric2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,1 L8,5 L0,9" fill="none" stroke="#f97316" stroke-width="2" />
+            </marker>
+            <marker id="arrow-iac" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,1 L8,5 L0,9" fill="none" stroke="#c084fc" stroke-width="2" />
+            </marker>
+          </defs>
+
+          <!-- Zones -->
+          <rect class="zone" x="20" y="20" width="200" height="340" />
+          <text class="zone-title" x="35" y="45">File System (IaC)</text>
+          
+          <rect class="zone" x="260" y="20" width="220" height="340" />
+          <text class="zone-title" x="275" y="45">Docker Network</text>
+
+          <!-- Nodes -->
+          <g class="node hm" transform="translate(40, 70)">
+            <rect width="160" height="50" />
+            <text class="title" x="15" y="22">HerdMaster API</text>
+            <text class="meta" x="15" y="40">/metrics endpoint</text>
+          </g>
+
+          <g class="node iac" transform="translate(40, 160)">
+            <rect width="160" height="50" />
+            <text class="title" x="15" y="22">dashboards.yml</text>
+            <text class="meta" x="15" y="40">Provisioning rules</text>
+          </g>
+          
+          <g class="node iac" transform="translate(40, 230)">
+            <rect width="160" height="50" />
+            <text class="title" x="15" y="22">herdmaster_main.json</text>
+            <text class="meta" x="15" y="40">Executive Layout</text>
+          </g>
+          
+          <g class="node iac" transform="translate(40, 300)">
+            <rect width="160" height="50" />
+            <text class="title" x="15" y="22">datasource.yml</text>
+            <text class="meta" x="15" y="40">Prometheus binding</text>
+          </g>
+
+          <g class="node prom" transform="translate(280, 70)">
+            <rect width="180" height="60" />
+            <text class="title" x="15" y="25">Prometheus</text>
+            <text class="meta" x="15" y="45">Scraping Engine</text>
+          </g>
+
+          <g class="node graf-full" transform="translate(280, 200)">
+            <rect width="180" height="120" />
+            <text class="title" x="15" y="25">Grafana UI</text>
+            <text class="meta" x="15" y="45">Auto-Provisioned</text>
+            
+            <!-- Mini dashboard visualization inside Grafana node -->
+            <rect x="15" y="60" width="45" height="15" fill="rgba(54, 211, 153, 0.2)" rx="2" />
+            <rect x="65" y="60" width="45" height="15" fill="rgba(54, 211, 153, 0.2)" rx="2" />
+            <rect x="115" y="60" width="50" height="15" fill="rgba(248, 193, 74, 0.2)" rx="2" />
+            <rect x="15" y="80" width="150" height="30" fill="rgba(145, 164, 187, 0.1)" rx="2" />
+            <path d="M20,105 L50,90 L80,100 L110,85 L150,95" fill="none" stroke="#36d399" stroke-width="2" />
+          </g>
+
+          <!-- Links -->
+          <!-- Scraping -->
+          <path class="flow metric" d="M280,95 L200,95" marker-end="url(#arrow-metric2)" />
+          
+          <!-- Provisioning Flow -->
+          <path class="flow iac" d="M200,185 C230,185 250,220 280,220" marker-end="url(#arrow-iac)" />
+          <path class="flow iac" d="M200,255 C230,255 250,260 280,260" marker-end="url(#arrow-iac)" />
+          <path class="flow iac" d="M200,325 C240,325 260,290 280,290" marker-end="url(#arrow-iac)" />
+          
+          <rect class="label-bg" x="220" y="235" width="45" height="20" />
+          <text class="label-text" style="fill: var(--acl)" x="225" y="249">Mount</text>
+
+        </svg>
+      </div>
+      
+      <table class="feature-list">
+        <tr>
+          <th>Component</th>
+          <th>Status</th>
+          <th>Day-2 Readiness</th>
+        </tr>
+        <tr>
+          <td>Metrics Exposition</td>
+          <td><span class="status-dot dot-green"></span> Functional</td>
+          <td>Ready</td>
+        </tr>
+        <tr>
+          <td>Dashboard Deployment</td>
+          <td><span class="status-dot dot-green"></span> Programmatic (IaC)</td>
+          <td>Instant, scalable</td>
+        </tr>
+        <tr>
+          <td>Version Control</td>
+          <td><span class="status-dot dot-green"></span> Fully GitOps</td>
+          <td>Enterprise Standard</td>
+        </tr>
+      </table>
+    </div>
+
+  </main>
+</body>
+</html>

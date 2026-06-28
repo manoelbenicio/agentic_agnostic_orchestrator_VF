@@ -1,0 +1,393 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "AOP API Traffic — Per Agent & Route",
+  "uid": "aop-api-agent-route",
+  "tags": ["aop", "api", "routes", "agents", "traffic"],
+  "timezone": "browser",
+  "description": "Real-time API traffic analysis broken down by route, HTTP method, status code, and agent. Sources: aop_http_requests_total, aop_http_request_duration_seconds from control-plane middleware.",
+  "templating": {
+    "list": [
+      {
+        "name": "route",
+        "label": "Route Filter",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "definition": "label_values(aop_http_requests_total, route)",
+        "query": "label_values(aop_http_requests_total, route)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "sort": 1
+      },
+      {
+        "name": "method",
+        "label": "HTTP Method",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "definition": "label_values(aop_http_requests_total, method)",
+        "query": "label_values(aop_http_requests_total, method)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "sort": 1
+      },
+      {
+        "name": "status",
+        "label": "Status Code",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "definition": "label_values(aop_http_requests_total, status)",
+        "query": "label_values(aop_http_requests_total, status)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+
+    {
+      "type": "row",
+      "title": "📡 API OVERVIEW — Real-Time Traffic",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+
+    {
+      "type": "stat",
+      "title": "Total Requests (5m)",
+      "description": "Total HTTP requests to the control-plane in the last 5 minutes",
+      "gridPos": { "x": 0, "y": 1, "w": 6, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "sum(increase(aop_http_requests_total[5m]))", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "semi-dark-blue" }, { "value": 100, "color": "dark-green" }] }, "unit": "short" } },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+
+    {
+      "type": "stat",
+      "title": "Success Rate (5m)",
+      "description": "Percentage of 2xx/3xx responses in the last 5 minutes",
+      "gridPos": { "x": 6, "y": 1, "w": 6, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(increase(aop_http_requests_total{status=~\"2..|3..\"}[5m])) / sum(increase(aop_http_requests_total[5m])) * 100",
+        "refId": "A"
+      }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "dark-red" }, { "value": 90, "color": "dark-yellow" }, { "value": 99, "color": "dark-green" }] }, "unit": "percent", "min": 0, "max": 100 } },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+
+    {
+      "type": "stat",
+      "title": "Error Count (5m)",
+      "description": "Total 4xx + 5xx responses in the last 5 minutes",
+      "gridPos": { "x": 12, "y": 1, "w": 6, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "sum(increase(aop_http_requests_total{status=~\"4..|5..\"}[5m]))", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "dark-green" }, { "value": 1, "color": "dark-yellow" }, { "value": 10, "color": "dark-red" }] }, "unit": "short" } },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+
+    {
+      "type": "stat",
+      "title": "p95 Latency (5m)",
+      "description": "95th percentile response time across all routes",
+      "gridPos": { "x": 18, "y": 1, "w": 6, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(aop_http_request_duration_seconds_bucket[5m])) by (le))",
+        "refId": "A"
+      }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "value": 0, "color": "dark-green" }, { "value": 0.5, "color": "dark-yellow" }, { "value": 2, "color": "dark-red" }] }, "unit": "s" } },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+
+    {
+      "type": "row",
+      "title": "🛤️ PER-ROUTE BREAKDOWN — Request Volume & Errors",
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Requests per Route (rate/s)",
+      "description": "Per-second request rate for each API route, broken down by route path",
+      "gridPos": { "x": 0, "y": 7, "w": 12, "h": 9 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(rate(aop_http_requests_total{route=~\"$route\",method=~\"$method\"}[5m])) by (route)",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 15, "gradientMode": "scheme", "showPoints": "auto", "pointSize": 5 }, "color": { "mode": "palette-classic" }, "unit": "reqps" } }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Error Rate per Route (4xx+5xx/s)",
+      "description": "Rate of client and server errors by route — spikes indicate broken endpoints",
+      "gridPos": { "x": 12, "y": 7, "w": 12, "h": 9 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(rate(aop_http_requests_total{route=~\"$route\",status=~\"4..|5..\"}[5m])) by (route)",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 20, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" }, "unit": "reqps" } }
+    },
+
+    {
+      "type": "barchart",
+      "title": "Top Routes by Volume (5m)",
+      "description": "Bar chart ranking routes by total request count in the last 5 minutes",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 9 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "topk(15, sum(increase(aop_http_requests_total{route=~\"$route\"}[5m])) by (route))",
+        "refId": "A",
+        "legendFormat": "{{route}}",
+        "instant": true
+      }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "showValue": "always", "barWidth": 0.7 }
+    },
+
+    {
+      "type": "table",
+      "title": "Route Status Matrix (5m)",
+      "description": "Detailed breakdown of requests per route per status code. Identifies exactly which routes return errors.",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 9 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(increase(aop_http_requests_total{route=~\"$route\"}[5m])) by (route, method, status)",
+        "refId": "A",
+        "format": "table",
+        "instant": true
+      }],
+      "transformations": [
+        { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "route": "Route", "method": "Method", "status": "Status", "Value": "Count" } } }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "center" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Status" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "basic" } }, { "id": "mappings", "value": [{ "type": "range", "options": { "from": 200, "to": 299, "result": { "color": "dark-green" } } }, { "type": "range", "options": { "from": 400, "to": 499, "result": { "color": "dark-yellow" } } }, { "type": "range", "options": { "from": 500, "to": 599, "result": { "color": "dark-red" } } }] }] }
+        ]
+      },
+      "options": { "showHeader": true, "frameIndex": 0, "footer": { "show": true, "reducer": ["sum"] } }
+    },
+
+    {
+      "type": "row",
+      "title": "⏱️ PER-ROUTE LATENCY — Response Time Analysis",
+      "gridPos": { "x": 0, "y": 25, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+
+    {
+      "type": "timeseries",
+      "title": "p50 Latency per Route",
+      "description": "Median (50th percentile) response time per route. Routes above 200ms may need optimization.",
+      "gridPos": { "x": 0, "y": 26, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "histogram_quantile(0.50, sum(rate(aop_http_request_duration_seconds_bucket{route=~\"$route\"}[5m])) by (le, route))",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "lineWidth": 2, "fillOpacity": 10, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" } } }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "p95 Latency per Route",
+      "description": "95th percentile response time per route. Captures tail latency that affects user experience.",
+      "gridPos": { "x": 8, "y": 26, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(aop_http_request_duration_seconds_bucket{route=~\"$route\"}[5m])) by (le, route))",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "lineWidth": 2, "fillOpacity": 10, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" } } }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "p99 Latency per Route",
+      "description": "99th percentile response time per route. Spikes indicate worst-case latency for that endpoint.",
+      "gridPos": { "x": 16, "y": 26, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "histogram_quantile(0.99, sum(rate(aop_http_request_duration_seconds_bucket{route=~\"$route\"}[5m])) by (le, route))",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "lineWidth": 2, "fillOpacity": 10, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" } } }
+    },
+
+    {
+      "type": "heatmap",
+      "title": "Request Duration Heatmap",
+      "description": "Overall request duration distribution across all routes. Dense bands indicate common response times.",
+      "gridPos": { "x": 0, "y": 34, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(increase(aop_http_request_duration_seconds_bucket{route=~\"$route\"}[$__rate_interval])) by (le)",
+        "refId": "A",
+        "format": "heatmap"
+      }],
+      "fieldConfig": { "defaults": { "custom": { "scaleDistribution": { "type": "log", "log": 2 } } } },
+      "options": { "calculate": false, "yAxis": { "unit": "s" }, "color": { "mode": "scheme", "scheme": "Oranges" }, "cellGap": 1 }
+    },
+
+    {
+      "type": "row",
+      "title": "📊 HTTP METHOD & STATUS CODE BREAKDOWN",
+      "gridPos": { "x": 0, "y": 42, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+
+    {
+      "type": "piechart",
+      "title": "Requests by Method (5m)",
+      "description": "Distribution of HTTP methods across all routes",
+      "gridPos": { "x": 0, "y": 43, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(increase(aop_http_requests_total{route=~\"$route\"}[5m])) by (method)",
+        "refId": "A",
+        "legendFormat": "{{method}}"
+      }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "options": { "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"] }, "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] } }
+    },
+
+    {
+      "type": "piechart",
+      "title": "Requests by Status Class (5m)",
+      "description": "Distribution of responses by status code class (2xx, 3xx, 4xx, 5xx)",
+      "gridPos": { "x": 8, "y": 43, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "sum(increase(aop_http_requests_total{status=~\"2..\",route=~\"$route\"}[5m]))", "refId": "A", "legendFormat": "2xx Success" },
+        { "expr": "sum(increase(aop_http_requests_total{status=~\"3..\",route=~\"$route\"}[5m]))", "refId": "B", "legendFormat": "3xx Redirect" },
+        { "expr": "sum(increase(aop_http_requests_total{status=~\"4..\",route=~\"$route\"}[5m]))", "refId": "C", "legendFormat": "4xx Client Error" },
+        { "expr": "sum(increase(aop_http_requests_total{status=~\"5..\",route=~\"$route\"}[5m]))", "refId": "D", "legendFormat": "5xx Server Error" }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "fixed" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "2xx Success" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "dark-green" } }] },
+          { "matcher": { "id": "byName", "options": "3xx Redirect" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "semi-dark-blue" } }] },
+          { "matcher": { "id": "byName", "options": "4xx Client Error" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "dark-yellow" } }] },
+          { "matcher": { "id": "byName", "options": "5xx Server Error" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "dark-red" } }] }
+        ]
+      },
+      "options": { "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"] }, "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] } }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Requests by Status Code Over Time",
+      "description": "Time series of individual HTTP status codes across all routes",
+      "gridPos": { "x": 16, "y": 43, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(rate(aop_http_requests_total{route=~\"$route\",status=~\"$status\"}[5m])) by (status)",
+        "refId": "A",
+        "legendFormat": "HTTP {{status}}"
+      }],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 15, "stacking": { "mode": "normal" }, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" }, "unit": "reqps" } }
+    },
+
+    {
+      "type": "row",
+      "title": "🤖 PER-AGENT API USAGE — FinOps Cost Attribution",
+      "gridPos": { "x": 0, "y": 51, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+
+    {
+      "type": "timeseries",
+      "title": "FinOps Cost per Agent (rate)",
+      "description": "Cost accumulation rate per agent for FinOps attribution. Derived from aop_finops_project_cost_usd grouped by engine (agent proxy).",
+      "gridPos": { "x": 0, "y": 52, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(rate(aop_finops_project_cost_usd[5m])) by (engine)",
+        "refId": "A",
+        "legendFormat": "{{engine}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "lineWidth": 2, "fillOpacity": 20, "gradientMode": "scheme" }, "color": { "mode": "palette-classic" } } }
+    },
+
+    {
+      "type": "barchart",
+      "title": "Cost by Project + Engine (24h)",
+      "description": "Total cost per project broken down by engine/agent over the last 24 hours",
+      "gridPos": { "x": 12, "y": 52, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "sum(increase(aop_finops_project_cost_usd[24h])) by (project_id, engine)",
+        "refId": "A",
+        "legendFormat": "{{project_id}} / {{engine}}",
+        "instant": true
+      }],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "color": { "mode": "palette-classic" } } },
+      "options": { "orientation": "horizontal", "showValue": "always", "stacking": "normal", "barWidth": 0.6 }
+    },
+
+    {
+      "type": "row",
+      "title": "🔬 ROUTE DEEP-DIVE — Slowest & Most Errored",
+      "gridPos": { "x": 0, "y": 60, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+
+    {
+      "type": "bargauge",
+      "title": "Top 10 Slowest Routes (p95)",
+      "description": "Routes with the highest p95 latency. Candidates for performance optimization.",
+      "gridPos": { "x": 0, "y": 61, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "topk(10, histogram_quantile(0.95, sum(rate(aop_http_request_duration_seconds_bucket[5m])) by (le, route)))",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "continuous-RdYlGr", "reverse": true }, "min": 0 } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    },
+
+    {
+      "type": "bargauge",
+      "title": "Top 10 Most Errored Routes (5m)",
+      "description": "Routes returning the most 4xx/5xx errors. Indicates broken or unstable endpoints.",
+      "gridPos": { "x": 12, "y": 61, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{
+        "expr": "topk(10, sum(increase(aop_http_requests_total{status=~\"4..|5..\"}[5m])) by (route))",
+        "refId": "A",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "continuous-RdYlGr", "reverse": true }, "min": 0 } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    }
+
+  ],
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "style": "dark"
+}

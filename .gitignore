@@ -39,3 +39,5 @@ ops/pentest-reports/
 # Agent internals
 .agent/
 .gemini/
+.github/
+agnostic-ai-platform/.github/

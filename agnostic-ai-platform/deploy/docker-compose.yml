@@ -1,0 +1,105 @@
+services:
+  frontend:
+    image: node:20-alpine
+    container_name: agnostic_ai_frontend
+    command: sh -c "echo 'Frontend placeholder' && tail -f /dev/null"
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - agnosticai_net
+    depends_on:
+      - backend
+
+  backend:
+    image: python:3.11-slim
+    container_name: agnostic_ai_backend
+    command: sh -c "echo 'Backend placeholder' && tail -f /dev/null"
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/agnosticai
+      - REDIS_URL=redis://redis:6379/0
+    networks:
+      - agnosticai_net
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: agnostic_ai_postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=agnosticai
+    expose:
+      - "5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - agnosticai_net
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: agnostic_ai_redis
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - agnosticai_net
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: agnostic_ai_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+    # Note: Requires a prometheus.yml config file to function completely. 
+    # Uncomment the mapping below once you have created the configuration file.
+    # - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - agnosticai_net
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: agnostic_ai_grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - agnosticai_net
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    container_name: agnostic_ai_blackbox
+    ports:
+      - "9115:9115"
+    networks:
+      - agnosticai_net
+    restart: unless-stopped
+
+networks:
+  agnosticai_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:

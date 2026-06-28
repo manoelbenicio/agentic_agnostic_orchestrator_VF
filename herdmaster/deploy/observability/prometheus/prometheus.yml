@@ -1,0 +1,70 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+# ── Alert Rules ────────────────────────────────────────────────────────────────
+# Anti-false-positive: agent registry integrity + health + task pipeline
+rule_files:
+  - "alert_rules.yml"
+
+# ── Alertmanager ───────────────────────────────────────────────────────────────
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['localhost:9093']
+      timeout: 5s
+
+# ── Scrape Jobs ────────────────────────────────────────────────────────────────
+scrape_configs:
+
+  # HerdMaster Control Plane — métricas internas (Prometheus exposition format)
+  # Inclui: agents_total, unlisted_agents_total, whitelist_compliant, tasks_total, etc.
+  - job_name: 'herdmaster-internal-metrics'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:8080']
+    authorization:
+      type: Bearer
+      # Token is generated at runtime by AOP/ops (herdmaster.token) and bind-mounted
+      # into the container; keeps Prometheus auth in sync with the live HerdMaster API.
+      credentials_file: /etc/prometheus/herdmaster.token
+    metrics_path: /metrics
+
+  # AOP Control Plane — FinOps + Tracing metrics
+  - job_name: 'aop-control-plane-metrics'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:8090']
+    metrics_path: /metrics
+
+  # Alertmanager — auto-monitoramento
+  - job_name: 'alertmanager'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9093']
+
+  # Remediation Webhook Server — Prometheus metrics (exposition format)
+  - job_name: 'herdmaster-remediation'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9099']
+    metrics_path: /metrics
+
+  # Blackbox E2E — verifica endpoints HTTP do Control Plane
+  - job_name: 'herdmaster-e2e-api-monitor'
+    scrape_interval: 15s
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://localhost:8080/status   # Control Plane health
+        - http://localhost:8080/agents   # Agent registry endpoint
+        - http://localhost:8080/metrics  # Metrics endpoint
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9115      # blackbox exporter port

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AOP · Backlog TL (verificado)</title>
+<style>
+  :root{
+    --deep:#002B3A; --dark:#003E50; --primary:#06596E; --accent:#00B0BD; --teal:#3F96AE;
+    --sky:#BADFF3; --ink:#00475A; --line:#C7CBC5; --success:#27AE60; --warning:#FF9800;
+    --error:#E91E63; --gold:#FFC107;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--deep);color:#EAF6FA;font-size:14px}
+  header{background:linear-gradient(135deg,var(--dark),var(--primary));padding:18px 24px;
+    border-bottom:3px solid var(--accent);position:sticky;top:0;z-index:10}
+  header h1{margin:0;font-size:20px;letter-spacing:.3px}
+  header .sub{font-size:12px;color:var(--sky);margin-top:4px}
+  .kpis{display:flex;flex-wrap:wrap;gap:10px;padding:16px 24px;background:var(--ink)}
+  .kpi{background:var(--dark);border:1px solid var(--primary);border-radius:10px;padding:10px 14px;min-width:96px;
+    cursor:pointer;transition:.15s;user-select:none}
+  .kpi:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .kpi.active{outline:2px solid var(--accent)}
+  .kpi .n{font-size:22px;font-weight:700}
+  .kpi .l{font-size:11px;color:var(--sky);text-transform:uppercase;letter-spacing:.5px}
+  .filters{display:flex;flex-wrap:wrap;gap:10px;padding:14px 24px;align-items:center;background:var(--deep);
+    border-bottom:1px solid var(--ink);position:sticky;top:64px;z-index:9}
+  .filters input,.filters select{background:var(--dark);color:#EAF6FA;border:1px solid var(--primary);
+    border-radius:8px;padding:8px 10px;font-size:13px}
+  .filters input[type=search]{min-width:240px}
+  .filters .clear{background:var(--accent);color:var(--deep);font-weight:700;border:none;cursor:pointer}
+  .wrap{padding:8px 24px 60px}
+  table{width:100%;border-collapse:collapse;background:var(--dark);border-radius:10px;overflow:hidden}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--ink);vertical-align:top}
+  th{background:var(--primary);color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.4px;cursor:pointer;
+    position:sticky;top:118px}
+  th:hover{background:var(--teal)}
+  tr:hover td{background:#013446}
+  .id{font-weight:700;color:var(--accent);white-space:nowrap}
+  .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+  .st-done{background:rgba(39,174,96,.18);color:#5fe39a;border:1px solid var(--success)}
+  .st-partial{background:rgba(255,152,0,.16);color:#ffc06b;border:1px solid var(--warning)}
+  .st-pending{background:rgba(186,223,243,.14);color:var(--sky);border:1px solid var(--teal)}
+  .st-rescheduled{background:rgba(255,193,7,.16);color:#ffd95e;border:1px solid var(--gold)}
+  .st-failed{background:rgba(233,30,99,.16);color:#ff77a3;border:1px solid var(--error)}
+  .st-canceled{background:rgba(199,203,197,.14);color:#cfd3cd;border:1px solid var(--line)}
+  .p0{color:#ff77a3;font-weight:700}.p1{color:#ffc06b;font-weight:700}.p2{color:var(--sky)}.p3{color:#cfd3cd}
+  .notes{color:#9fc4d3;font-size:12px;max-width:360px}
+  .agent{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#bfe6f0}
+  .count{padding:8px 24px;color:var(--sky);font-size:12px}
+  .empty{padding:40px;text-align:center;color:var(--sky)}
+  footer{padding:16px 24px;color:#7fb0c2;font-size:11px;border-top:1px solid var(--ink)}
+</style>
+</head>
+<body>
+<header>
+  <h1>📋 AOP · Backlog do Tech-Lead <span style="color:var(--accent)">(verificado por comando)</span></h1>
+  <div class="sub">Fonte de verdade: verificação independente do TL (build/test/curl/psql) — NÃO relato de agente · 2026-06-26</div>
+</header>
+
+<div class="kpis" id="kpis"></div>
+
+<div class="filters">
+  <input type="search" id="q" placeholder="🔎 buscar (id, item, agente, notas)…">
+  <select id="fStatus"><option value="">Status: todos</option></select>
+  <select id="fPrio"><option value="">Prioridade: todas</option></select>
+  <select id="fAgent"><option value="">Agente: todos</option></select>
+  <select id="fCat"><option value="">Categoria: todas</option></select>
+  <button class="clear" id="clear">Limpar filtros</button>
+</div>
+
+<div class="count" id="count"></div>
+<div class="wrap">
+  <table id="tbl">
+    <thead><tr>
+      <th data-k="id">ID</th><th data-k="item">Item</th><th data-k="cat">Categoria</th>
+      <th data-k="prio">Prio</th><th data-k="eta">ETA</th><th data-k="agent">Agente</th>
+      <th data-k="status">Status</th><th data-k="notes">Evidência / Nota</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div class="empty" id="empty" style="display:none">Nenhum item com esses filtros.</div>
+</div>
+<footer>Gerado pelo TL (KIRO_OPUS-48). Status: done=verificado · partial=parcial/a finalizar · pending=a desenvolver · rescheduled=reagendado · failed · canceled. Clique nos KPIs ou cabeçalhos para filtrar/ordenar.</footer>
+
+<script>
+const DATA = [
+  {id:"F0",item:"Design System Indra HEX + Shell",cat:"Design",prio:"P0",eta:"90m",agent:"CODEX_55#1",status:"done",notes:"build EXIT=0; globals.css 0 OKLCH/66 HEX; 15 componentes ui/"},
+  {id:"F1",item:"Projects (backend + UI)",cat:"Product",prio:"P1",eta:"30m",agent:"AG-2/CODEX_55#2",status:"done",notes:"tabela projects existe; /projects 200; build ok"},
+  {id:"F2",item:"Issues/Tasks (kanban)",cat:"Product",prio:"P1",eta:"30m",agent:"AG-2/CODEX_55#3",status:"partial",notes:"UI+API ok porém mock: issues-view.tsx:629 progresso hardcoded → TD13"},
+  {id:"F3",item:"Squad Builder + Agents",cat:"Product",prio:"P2",eta:"45m",agent:"AGY-OPUS-46",status:"done",notes:"rotas /squads/{id}/topology; topology=1 linha; build ok"},
+  {id:"F4",item:"Seats + Sessions/OAuth",cat:"Product",prio:"P1",eta:"60m",agent:"AG-4",status:"done",notes:"tabelas seats/sessions; /seats,/sessions 200"},
+  {id:"F5",item:"FinOps + Observability + Live",cat:"Product",prio:"P1",eta:"30m",agent:"AG-5",status:"partial",notes:"strings fixas (observability:92); círculo finops simulado (cosmético)"},
+  {id:"F6",item:"Settings + Inbox + My-Issues + Search",cat:"Product",prio:"P1",eta:"30m",agent:"AG-6",status:"done",notes:"settings=2 linhas reais; sem placeholder"},
+  {id:"F7",item:"E2E + UI/Perf/A11y review",cat:"QA",prio:"P3",eta:"final",agent:"rotativo",status:"pending",notes:"depende de TD8/12/13/14; ver TD10"},
+  {id:"TD4",item:"Robustez DB/pool (rollback/reconnect)",cat:"Infra",prio:"P0",eta:"45m",agent:"CODEX_55#0",status:"done",notes:"pytest lifecycle 23 passed"},
+  {id:"TD6",item:"Coupling control-plane↔HerdMaster",cat:"Infra",prio:"P0",eta:"30m",agent:"CODEX_55#1",status:"done",notes:"curl /health → coupling connected, bus connected"},
+  {id:"TD1",item:"inbox_api + plugar /inbox",cat:"Backend",prio:"P1",eta:"30m",agent:"CODEX_55#1",status:"done",notes:"inbox_api existe; router incluído; sem 'Simulando'"},
+  {id:"TD2",item:"/issues/my + plugar /my-issues",cat:"Backend",prio:"P1",eta:"30m",agent:"CODEX_55#3",status:"done",notes:"fetch ${apiBase}/issues/my; sem placeholder"},
+  {id:"TD3",item:"settings_api + plugar /settings",cat:"Backend",prio:"P1",eta:"30m",agent:"CODEX_55#2",status:"done",notes:"settings_api; router; settings=2 linhas"},
+  {id:"TD5",item:"OTTL (trilha + reconciliador + board)",cat:"Infra",prio:"P1",eta:"120m",agent:"AGY_Gemini-PRO31",status:"partial",notes:"23 testes passam, MAS tasks/audit em schema de TESTE hm_test_* (1 linha) → TD12"},
+  {id:"TD11",item:"squad_api (topologia)",cat:"Backend",prio:"P2",eta:"45m",agent:"CODEX_55#0",status:"done",notes:"rotas topology presentes; build ok"},
+  {id:"TD7",item:"Grafana porta + dashboards",cat:"Observability",prio:"P2",eta:"30m",agent:"CODEX_55#2",status:"partial",notes:":3000 200; 2-3 dashboards AOP; MAS 2 targets Prometheus DOWN → TD14"},
+  {id:"TD8",item:"Reconciliar OpenSpec ↔ código",cat:"Docs",prio:"P1",eta:"60m",agent:"a atribuir",status:"pending",notes:"tasks.md done=51/total=65 → 14 abertos"},
+  {id:"TD9",item:"Integração F1→F6 ponta-a-ponta",cat:"Integration",prio:"P2",eta:"60m",agent:"a atribuir",status:"partial",notes:"telas ligadas a API real (verificado); falta smoke e2e"},
+  {id:"TD10",item:"QA E2E exaustivo",cat:"QA",prio:"P3",eta:"final",agent:"rotativo",status:"rescheduled",notes:"reagendado para o FINAL (regra)"},
+  {id:"TD12",item:"DB: consolidar schemas / limpar poluição",cat:"Infra",prio:"P0",eta:"60m",agent:"a atribuir",status:"pending",notes:"NOVO · 33 schemas; tasks/audit em hm_test_*; lixo ag2_*/ag3_*/ag4_*/*_evidence"},
+  {id:"TD13",item:"Remover mock/placeholder residual",cat:"Frontend",prio:"P1",eta:"30m",agent:"a atribuir",status:"pending",notes:"NOVO · issues-view.tsx:629 progress fixo; observability:92 summary fixo; finops círculo"},
+  {id:"TD14",item:"Prometheus targets DOWN",cat:"Observability",prio:"P1",eta:"30m",agent:"a atribuir",status:"pending",notes:"NOVO · herdmaster-internal-metrics + herdmaster-remediation = down"}
+];
+const STLABEL={done:"✅ done",partial:"🟡 parcial",pending:"⬜ pendente",rescheduled:"⏸ reagendado",failed:"🔴 failed",canceled:"⊘ canceled"};
+const PRORDER={P0:0,P1:1,P2:2,P3:3};
+let sortK="prio",sortDir=1,kpiFilter="";
+
+function uniq(k){return [...new Set(DATA.map(d=>d[k]))].sort();}
+function fillSel(id,k,label){const s=document.getElementById(id);uniq(k).forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;s.appendChild(o);});}
+fillSel("fStatus","status");fillSel("fPrio","prio");fillSel("fAgent","agent");fillSel("fCat","cat");
+// relabel status options
+[...document.getElementById("fStatus").options].forEach(o=>{if(o.value)o.textContent=STLABEL[o.value]||o.value;});
+
+function buildKpis(){
+  const counts={};DATA.forEach(d=>counts[d.status]=(counts[d.status]||0)+1);
+  const k=document.getElementById("kpis");k.innerHTML="";
+  const all=document.createElement("div");all.className="kpi"+(kpiFilter===""?" active":"");
+  all.innerHTML=`<div class="n">${DATA.length}</div><div class="l">Total</div>`;
+  all.onclick=()=>{kpiFilter="";document.getElementById("fStatus").value="";render();};k.appendChild(all);
+  ["pending","partial","rescheduled","failed","canceled","done"].forEach(s=>{
+    const d=document.createElement("div");d.className="kpi"+(kpiFilter===s?" active":"");
+    d.innerHTML=`<div class="n">${counts[s]||0}</div><div class="l">${STLABEL[s]}</div>`;
+    d.onclick=()=>{kpiFilter=s;document.getElementById("fStatus").value=s;render();};k.appendChild(d);
+  });
+}
+function getFiltered(){
+  const q=document.getElementById("q").value.toLowerCase();
+  const fs=document.getElementById("fStatus").value,fp=document.getElementById("fPrio").value,
+        fa=document.getElementById("fAgent").value,fc=document.getElementById("fCat").value;
+  let r=DATA.filter(d=>{
+    if(fs&&d.status!==fs)return false;if(fp&&d.prio!==fp)return false;
+    if(fa&&d.agent!==fa)return false;if(fc&&d.cat!==fc)return false;
+    if(q){const blob=(d.id+" "+d.item+" "+d.agent+" "+d.notes+" "+d.cat).toLowerCase();if(!blob.includes(q))return false;}
+    return true;});
+  r.sort((a,b)=>{let x,y;if(sortK==="prio"){x=PRORDER[a.prio];y=PRORDER[b.prio];}else{x=a[sortK];y=b[sortK];}
+    return (x>y?1:x<y?-1:0)*sortDir;});
+  return r;
+}
+function render(){
+  buildKpis();
+  const rows=getFiltered();const tb=document.getElementById("rows");tb.innerHTML="";
+  document.getElementById("empty").style.display=rows.length?"none":"block";
+  rows.forEach(d=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td class="id">${d.id}</td><td>${d.item}</td><td>${d.cat}</td>
+      <td class="${d.prio.toLowerCase()}">${d.prio}</td><td>${d.eta}</td>
+      <td class="agent">${d.agent}</td>
+      <td><span class="badge st-${d.status}">${STLABEL[d.status]}</span></td>
+      <td class="notes">${d.notes}</td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById("count").textContent=`Mostrando ${rows.length} de ${DATA.length} itens`;
+}
+document.querySelectorAll("th").forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=1;}render();});
+["q","fStatus","fPrio","fAgent","fCat"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{kpiFilter=document.getElementById("fStatus").value;render();}));
+document.getElementById("clear").onclick=()=>{document.getElementById("q").value="";["fStatus","fPrio","fAgent","fCat"].forEach(id=>document.getElementById(id).value="");kpiFilter="";render();};
+render();
+</script>
+</body>
+</html>

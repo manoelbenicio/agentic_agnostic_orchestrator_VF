@@ -28,6 +28,21 @@ def _database_url() -> str:
     )
 
 
+def _redis_url() -> str:
+    env_path = Path(__file__).resolve().parents[3] / "deploy" / ".env"
+    values: dict[str, str] = {}
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key] = value
+    redis_port = os.environ.get("REDIS_PORT") or values.get("REDIS_PORT") or "6379"
+    redis_password = os.environ.get("REDIS_PASSWORD") or values.get("REDIS_PASSWORD") or ""
+    if redis_password:
+        return f"redis://:{redis_password}@127.0.0.1:{redis_port}/0"
+    return f"redis://127.0.0.1:{redis_port}/0"
+
+
 @pytest.fixture
 def api_client(monkeypatch):
     database_url = _database_url()
@@ -37,13 +52,18 @@ def api_client(monkeypatch):
         "AOP_TRACING_SCHEMA": f"app_tracing_test_{uuid4().hex}",
         "AOP_PROJECTS_SCHEMA": f"app_projects_test_{uuid4().hex}",
         "AOP_ISSUES_SCHEMA": f"app_issues_test_{uuid4().hex}",
+        "AOP_SEATS_API_SCHEMA": f"app_seats_test_{uuid4().hex}",
+        "AOP_SESSIONS_API_SCHEMA": f"app_sessions_test_{uuid4().hex}",
+        "AOP_PROVISIONING_SCHEMA": f"app_provisioning_test_{uuid4().hex}",
     }
     for key, value in schemas.items():
         monkeypatch.setenv(key, value)
+    monkeypatch.delenv("AOP_SEATS_FILE", raising=False)
+    monkeypatch.delenv("AOP_SEATS_JSON", raising=False)
 
     settings = Settings(
         database_url=database_url,
-        redis_url=os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/0"),
+        redis_url=os.environ.get("REDIS_URL") or _redis_url(),
         host="127.0.0.1",
         port=8090,
     )

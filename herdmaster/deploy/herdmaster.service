@@ -1,0 +1,60 @@
+# HerdMaster - systemd --user unit file
+#
+# Purpose: Run HerdMaster as a user-level systemd service that auto-restarts on
+# failure without affecting the system-wide Herdr instance (NFR-009).
+#
+# Install:   cp deploy/herdmaster.service ~/.config/systemd/user/
+#            systemctl --user daemon-reload
+#            systemctl --user enable herdmaster
+#            systemctl --user start herdmaster
+#
+# Status:    systemctl --user status herdmaster
+# Logs:      journalctl --user -u herdmaster -f
+
+[Unit]
+# Human-readable description shown in systemctl status.
+Description=HerdMaster multi-agent orchestration control plane
+
+# Start only after basic system targets are available.
+After=network.target
+
+[Service]
+# --- Execution ---
+# systemd should treat the long-running CLI process as the service.
+Type=simple
+
+# Start HerdMaster through the installed console script with HTTP enabled for Grafana/Blackbox.
+ExecStart=/usr/bin/env herdmaster start --http
+
+# --- Working directory ---
+# Use HerdMaster's user config/data directory for DB, socket, and logs.
+WorkingDirectory=%h/.config/herdmaster
+
+# --- Environment ---
+# Include common user install locations for pipx and pip --user console scripts.
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+# Force unbuffered output so systemd journal captures logs immediately.
+Environment=PYTHONUNBUFFERED=1
+
+# --- Process limits ---
+# Keep accidental memory growth bounded while leaving normal operation room.
+LimitAS=128M
+
+# Keep file descriptor usage bounded for the socket, DB, and logs.
+LimitNOFILE=4096
+
+# --- Restart policy (PRD 12 / NFR-009) ---
+# Restart on unclean exits so HerdMaster can recover while Herdr continues.
+Restart=on-failure
+
+# Wait briefly before restart to avoid a tight crash loop.
+RestartSec=5
+
+# --- Security ---
+# Run with no extra privileges; if HerdMaster crashes, Herdr stays untouched.
+NoNewPrivileges=yes
+
+[Install]
+# Pull in the default user target so the service starts on login.
+WantedBy=default.target

@@ -1,0 +1,33 @@
+TD7 Grafana Dashboard Expansion — Evidence Log
+================================================
+Timestamp: 2026-06-26T23:27:15Z
+Agent: w8:pY (AGY_Gemini-PRO31)
+Task: task-20260626231652776274-38855969a45a424ba2d1fa883ef3c3fc
+
+DELIVERABLES:
+1. NEW DASHBOARD: aop_api_agent_route.json (uid: aop-api-agent-route)
+   - 25 panels (19 data + 6 rows)
+   - Variables: route, method, status
+   - Covers: API overview (4 stats), per-route volume+errors (4 panels),
+     per-route latency p50/p95/p99+heatmap (4 panels), HTTP method+status
+     pie charts+timeline (3 panels), per-agent FinOps attribution (2 panels),
+     route deep-dive slowest+most-errored (2 panels)
+
+2. EXPANDED: herdmaster_main.json (uid: herdmaster-squad-control)
+   - Was: 26 panels (20 data + 6 rows), variables: [agent]
+   - Now: 34 panels (26 data + 8 rows), variables: [agent, route]
+   - Added: $route template variable, 2 new row sections:
+     a) API TRAFFIC BY ROUTE (4 panels: rate/s, error rate, p95 latency, top routes)
+     b) PER-AGENT TASK THROUGHPUT (2 panels: completions rate, avg duration)
+
+3. PROVISIONING: dashboards.yml unchanged — auto-discovers all .json in the
+   mounted volume (/etc/grafana/provisioning/dashboards) with 10s refresh.
+
+VALIDATION:
+- herdmaster_main.json: VALID JSON ✓
+- aop_api_agent_route.json: VALID JSON ✓
+- aop_finops_tracing.json: UNCHANGED ✓
+
+SHA256:
+- herdmaster_main.json:      465c983dc79a67fae1fb3f3f9542d72802523a107e4fa79f2d84ae01fe1f2aec
+- aop_api_agent_route.json:  c9de40a6b00d353c9136d1c9e277e34bdb29ea7835660c1fea63fa34ac842eb2

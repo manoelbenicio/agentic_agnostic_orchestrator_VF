@@ -1,0 +1,4 @@
+# Visualization Configuration
+tools: [Tableau, Power BI, Matplotlib, Seaborn, Plotly]
+chart_types: [bar, line, scatter, pie, heatmap, treemap, box, histogram]
+principles: [clarity, accuracy, efficiency, aesthetics]

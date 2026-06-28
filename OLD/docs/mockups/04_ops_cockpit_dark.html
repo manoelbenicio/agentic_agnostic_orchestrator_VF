@@ -1,0 +1,54 @@
+<!doctype html><html lang="pt-BR" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layout 4 — Ops Cockpit (dark)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0f15;--panel:#11151d;--panel2:#141925;--text:#e7ecf5;--muted:#8b95a8;--faint:#5c6577;--bd:#212838;--pri:#5b8cf0;--acc:#37e0a3;--ok:#37e0a3;--warn:#f0b048;--err:#f06363;--grid:#161c28}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px}.mono{font-family:"JetBrains Mono",monospace}
+.app{display:grid;grid-template-columns:58px 1fr;height:100vh}
+.rail{background:#080a0f;border-right:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0}
+.lg{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pri),var(--acc));color:#08111a;display:grid;place-items:center;font-weight:800;margin-bottom:8px}
+.rl{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;color:var(--faint);cursor:pointer;font-size:16px}.rl:hover{background:var(--panel);color:var(--text)}.rl.on{background:var(--panel2);color:var(--acc);box-shadow:inset 0 0 0 1px var(--bd)}
+.main{display:flex;flex-direction:column;min-width:0}
+.tb{height:50px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:14px;padding:0 18px;background:#0a0d13}
+.tb b{font-size:13px}.tb .mono{color:var(--muted)}
+.led{display:inline-flex;gap:7px;align-items:center;background:rgba(55,224,163,.1);color:var(--ok);font-weight:600;font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(55,224,163,.25)}
+.st{width:7px;height:7px;border-radius:50%;display:inline-block;box-shadow:0 0 8px currentColor}
+.ct{padding:14px;overflow:auto;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:min-content;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.ph{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid var(--bd);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.ph .x{margin-left:auto;color:var(--faint)}
+.pb{padding:13px}
+.kpi .v{font-size:28px;font-weight:700;font-family:"JetBrains Mono",monospace}.kpi .s{font-size:11px;color:var(--muted)}
+.span2{grid-column:span 2}.span4{grid-column:span 4}
+table{width:100%;border-collapse:collapse;font-size:12px}td{padding:8px 13px;border-bottom:1px solid var(--grid)}tr:last-child td{border:0}
+.tag{font-family:"JetBrains Mono",monospace;font-size:10px;padding:2px 7px;border-radius:5px;background:rgba(91,140,240,.14);color:var(--pri)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:7px;box-shadow:0 0 7px currentColor}
+.bars{display:flex;align-items:flex-end;gap:4px;height:80px}.bars i{flex:1;background:linear-gradient(var(--pri),rgba(91,140,240,.2));border-radius:3px 3px 0 0}
+.trace{font-family:"JetBrains Mono",monospace;font-size:11.5px;line-height:1.85;padding:12px;color:var(--muted)}
+.trace b{color:var(--pri);font-weight:500}.trace em{color:var(--ok);font-style:normal}.trace .w{color:var(--warn)}.trace .t{color:var(--faint)}
+</style></head><body>
+<div class="app">
+<div class="rail"><div class="lg">◧</div><div class="rl on">▦</div><div class="rl">◳</div><div class="rl">⬡</div><div class="rl">((•))</div><div class="rl">⚷</div><div class="rl">＄</div><div class="rl" style="margin-top:auto">⚙</div></div>
+<div class="main"><div class="tb"><b>AOP · Ops Cockpit</b><span class="mono">tenant-a</span><div style="margin-left:auto;display:flex;gap:8px">
+<span class="led"><span class="st" style="color:var(--ok)"></span>API connected</span><span class="led" style="background:rgba(240,176,72,.1);color:var(--warn);border-color:rgba(240,176,72,.25)"><span class="st" style="color:var(--warn)"></span>1 alert</span></div></div>
+<div class="ct">
+<div class="panel kpi"><div class="ph">Agentes ativos</div><div class="pb"><div class="v" style="color:var(--acc)">09</div><div class="s">▲ 2 vs 24h</div></div></div>
+<div class="panel kpi"><div class="ph">Seats</div><div class="pb"><div class="v">06/15</div><div class="s">40% util.</div></div></div>
+<div class="panel kpi"><div class="ph">Tasks 24h</div><div class="pb"><div class="v">128</div><div class="s" style="color:var(--ok)">▲ 18%</div></div></div>
+<div class="panel kpi"><div class="ph">Burn 24h</div><div class="pb"><div class="v" style="color:var(--warn)">$42</div><div class="s">$28 tok · $14 seat</div></div></div>
+<div class="panel span2"><div class="ph">Agentes <span class="x mono">live</span></div><table>
+<tr><td><span class="dot" style="color:var(--warn)"></span>Kiro_Opus-48</td><td><span class="tag">TECH-LEAD</span></td><td class="mono">working</td><td class="mono" style="text-align:right">3.1k</td></tr>
+<tr><td><span class="dot" style="color:var(--ok)"></span>Codex #1</td><td><span class="tag">worker</span></td><td class="mono">idle</td><td class="mono" style="text-align:right">820</td></tr>
+<tr><td><span class="dot" style="color:var(--warn)"></span>AGY_Opus-46</td><td><span class="tag">worker</span></td><td class="mono">working</td><td class="mono" style="text-align:right">2.4k</td></tr>
+<tr><td><span class="dot" style="color:var(--err)"></span>Gemini Flash</td><td><span class="tag">worker</span></td><td class="mono">blocked</td><td class="mono" style="text-align:right">1.1k</td></tr></table></div>
+<div class="panel span2"><div class="ph">Throughput (tasks/h)</div><div class="pb"><div class="bars"><i style="height:40%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:70%"></i><i style="height:62%"></i><i style="height:88%"></i><i style="height:75%"></i><i style="height:95%"></i><i style="height:80%"></i><i style="height:66%"></i><i style="height:90%"></i><i style="height:72%"></i></div></div></div>
+<div class="panel span2"><div class="ph">Live trace · Kiro_Opus-48</div><div class="trace">
+<span class="t">12:03:01</span> <b>thinking</b> decompondo objetivo → 4 subtarefas<br>
+<span class="t">12:03:07</span> <b>dispatch</b> → Codex#1 <span class="w">(terminal)</span> AOP-088<br>
+<span class="t">12:03:48</span> <em>done</em> subtask · burn 1.2k<br>
+<span class="t">12:04:03</span> <b>review</b> consenso aprovado</div></div>
+<div class="panel span2"><div class="ph">Quota / burn por vendor</div><div class="pb" style="display:flex;flex-direction:column;gap:11px">
+<div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span class="mono">openai/codex</span><span class="mono">52% · 5h</span></div><div style="height:7px;background:var(--grid);border-radius:5px;margin-top:5px"><i style="display:block;width:52%;height:100%;background:var(--pri);border-radius:5px"></i></div></div>
+<div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span class="mono">antigravity</span><span class="mono">88% · 5h</span></div><div style="height:7px;background:var(--grid);border-radius:5px;margin-top:5px"><i style="display:block;width:88%;height:100%;background:var(--warn);border-radius:5px"></i></div></div>
+<div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span class="mono">kiro</span><span class="mono">31% · 5h</span></div><div style="height:7px;background:var(--grid);border-radius:5px;margin-top:5px"><i style="display:block;width:31%;height:100%;background:var(--acc);border-radius:5px"></i></div></div></div></div>
+</div></div></div></body></html>

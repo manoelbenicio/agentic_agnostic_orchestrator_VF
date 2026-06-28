@@ -1,0 +1,66 @@
+[paths]
+config_dir = "~/.config/herdmaster"
+db = "herdmaster.db"
+socket = "herdmaster.sock"
+log = "herdmaster.log"
+
+[watchdog]
+soft_timeout_s = 10.0
+hard_timeout_s = 30.0
+poll_interval_s = 15
+max_retries = 3
+tertiary_hash_interval_s = 30
+
+[bus]
+socket_path = "~/.config/herdmaster/herdmaster.sock"
+message_ttl_s = 300
+
+[herdr]
+# Herdr socket path. Resolution order: HERDR_SOCKET_PATH, this value,
+# HERDR_SESSION (~/.config/herdr/sessions/<name>/herdr.sock), then default.
+socket_path = "~/.config/herdr/herdr.sock"
+
+[acl]
+default_policy = "deny"
+
+# [[acl.roles]].agents uses Herdr pane_id values such as "w4:p2", not invented agent IDs.
+[[acl.roles]]
+name = "orchestrator"
+agents = ["w4:p2"]
+can_send_to = ["*"]
+can_receive_from = ["*"]
+can_dispatch_tasks = true
+can_reassign_tasks = true
+
+[[acl.roles]]
+name = "worker"
+agents = ["w4:pA", "w4:pC", "w4:pQ"]
+can_send_to = ["orchestrator"]
+can_receive_from = ["orchestrator"]
+can_dispatch_tasks = false
+can_reassign_tasks = false
+
+[[acl.roles]]
+name = "peer_reviewer"
+agents = ["w4:pA", "w4:pC"]
+can_send_to = ["orchestrator", "peer_reviewer"]
+can_receive_from = ["orchestrator", "peer_reviewer"]
+can_dispatch_tasks = false
+can_reassign_tasks = false
+
+[[acl.roles]]
+name = "observer"
+agents = []
+can_send_to = []
+can_receive_from = ["*"]
+can_dispatch_tasks = false
+can_reassign_tasks = false
+
+[api]
+bind = "127.0.0.1"
+port = 8080
+token = ""
+
+[logging]
+level = "INFO"
+json = true

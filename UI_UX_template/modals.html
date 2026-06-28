@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PortalShift Intelligence — Interactive modal and dialog component showcase following DSS v3.0 corporate standard.">
+  <title>Component Library | PortalShift Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .modal-shell { display: flex; min-height: 100vh; }
+    .modal-sidebar {
+      width: 64px; background: var(--indra-deep-navy);
+      border-right: 1px solid var(--indra-border); display: flex;
+      flex-direction: column; align-items: center; padding: 16px 0; gap: 28px;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    }
+    .modal-sidebar .logo-mark {
+      width: 36px; height: 36px; background: var(--indra-cyan);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: var(--indra-deep-navy); margin-bottom: 16px;
+    }
+    .modal-sidebar .nav-icon {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      color: var(--indra-muted-teal); cursor: pointer; transition: all 0.2s;
+      position: relative; text-decoration: none;
+    }
+    .modal-sidebar .nav-icon:hover, .modal-sidebar .nav-icon.active { color: var(--indra-cyan); }
+    .modal-sidebar .nav-icon.active::before {
+      content: ''; position: absolute; left: -12px; top: 8px;
+      width: 3px; height: 24px; background: var(--indra-cyan);
+    }
+    .modal-sidebar svg { width: 22px; height: 22px; }
+    .modal-main { margin-left: 64px; flex: 1; }
+    .modal-topbar {
+      height: 56px; background: var(--indra-deep-navy);
+      border-bottom: 1px solid var(--indra-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; position: sticky; top: 0; z-index: 50;
+    }
+    .modal-topbar h1 { font-size: 16px; font-weight: 600; color: var(--indra-white); }
+    .modal-topbar .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--indra-card-surface); border: 2px solid var(--indra-cyan);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: var(--indra-cyan);
+    }
+    .modal-content { padding: 32px; }
+    .modal-content h2 { font-size: 24px; font-weight: 600; color: var(--indra-white); margin-bottom: 8px; }
+    .modal-content .subtitle { font-size: 14px; color: var(--indra-muted-teal); margin-bottom: 32px; }
+
+    /* Trigger Buttons Row */
+    .trigger-row { display: flex; gap: 16px; margin-bottom: 40px; flex-wrap: wrap; }
+    .trigger-btn {
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+      padding: 12px 24px; border-radius: 0; cursor: pointer; transition: all 0.2s;
+    }
+    .trigger-btn.primary {
+      background: var(--indra-cyan); color: var(--indra-deep-navy); border: none;
+    }
+    .trigger-btn.primary:hover { background: var(--indra-light-teal); }
+    .trigger-btn.ghost {
+      background: transparent; color: var(--indra-cyan); border: 1px solid var(--indra-cyan);
+    }
+    .trigger-btn.ghost:hover { background: rgba(0,176,189,0.1); }
+    .trigger-btn.danger {
+      background: var(--indra-error); color: #fff; border: none;
+    }
+    .trigger-btn.danger:hover { opacity: 0.85; }
+
+    /* Overlay */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,43,58,0.65);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      z-index: 200; display: none; align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-overlay.show { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Modal Card */
+    .modal-card {
+      background: var(--indra-card-surface); border-radius: 8px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4); position: relative;
+      animation: slideUp 0.25s ease;
+    }
+    .modal-card .close-btn {
+      position: absolute; top: 16px; right: 16px; width: 28px; height: 28px;
+      background: transparent; border: none; color: var(--indra-muted-teal);
+      cursor: pointer; font-size: 18px; display: flex; align-items: center;
+      justify-content: center; transition: color 0.2s;
+    }
+    .modal-card .close-btn:hover { color: var(--indra-white); }
+    .modal-card .modal-header {
+      padding: 24px 32px 16px; border-bottom: 1px solid var(--indra-border);
+    }
+    .modal-card .modal-header h3 {
+      font-size: 20px; font-weight: 600; color: var(--indra-white); margin: 0;
+    }
+    .modal-card .modal-body { padding: 24px 32px; }
+    .modal-card .modal-footer {
+      padding: 16px 32px 24px; display: flex; justify-content: flex-end; gap: 12px;
+    }
+
+    /* Confirm Modal */
+    .modal-confirm { width: 480px; max-width: 90vw; }
+    .modal-confirm .modal-body p {
+      font-size: 14px; color: var(--indra-light-teal); line-height: 1.6; margin: 0;
+    }
+    .modal-confirm .modal-body .deploy-info {
+      background: var(--indra-deep-navy); border: 1px solid var(--indra-border);
+      padding: 12px 16px; margin-top: 16px; border-radius: 4px;
+    }
+    .modal-confirm .deploy-info .info-row {
+      display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0;
+    }
+    .modal-confirm .deploy-info .info-label { color: var(--indra-muted-teal); }
+    .modal-confirm .deploy-info .info-value { color: var(--indra-white); font-weight: 500; }
+
+    /* Form Modal */
+    .modal-form { width: 560px; max-width: 90vw; }
+    .form-field { margin-bottom: 24px; }
+    .form-field label {
+      display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--indra-muted-teal); margin-bottom: 8px;
+    }
+    .form-field input, .form-field select, .form-field textarea {
+      width: 100%; background: transparent; border: none;
+      border-bottom: 2px solid var(--indra-muted-teal); color: var(--indra-white);
+      font-family: 'Inter', sans-serif; font-size: 15px; padding: 10px 0;
+      outline: none; transition: border-color 0.2s;
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      border-bottom-color: var(--indra-cyan);
+    }
+    .form-field input::placeholder { color: rgba(122,156,174,0.5); }
+    .form-field textarea { resize: vertical; min-height: 60px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    /* Alert Modal */
+    .modal-alert { width: 440px; max-width: 90vw; border-left: 4px solid var(--indra-error); }
+    .modal-alert .modal-header { display: flex; align-items: center; gap: 12px; border-bottom: none; padding-bottom: 8px; }
+    .modal-alert .modal-header .alert-icon {
+      width: 32px; height: 32px; background: rgba(233,30,99,0.15);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: var(--indra-error); font-size: 16px; flex-shrink: 0;
+    }
+    .modal-alert .error-detail {
+      background: var(--indra-deep-navy); border: 1px solid rgba(233,30,99,0.2);
+      padding: 14px; border-radius: 4px; margin-top: 12px;
+      font-family: 'Space Grotesk', monospace; font-size: 13px;
+      color: var(--indra-light-teal); line-height: 1.6; white-space: pre-wrap;
+    }
+    .modal-alert .error-detail .err-line { color: var(--indra-error); font-weight: 600; }
+
+    /* Preview Cards (static display) */
+    .preview-section { margin-top: 48px; }
+    .preview-section h3 {
+      font-size: 16px; font-weight: 600; color: var(--indra-white); margin-bottom: 8px;
+    }
+    .preview-section .section-desc {
+      font-size: 13px; color: var(--indra-muted-teal); margin-bottom: 24px;
+    }
+    .preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .preview-card {
+      background: var(--indra-card-surface); border: 1px solid var(--indra-border);
+      border-radius: 8px; padding: 20px 24px;
+    }
+    .preview-card .pc-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--indra-muted-teal); margin-bottom: 10px;
+    }
+    .preview-card .pc-title { font-size: 16px; font-weight: 600; color: var(--indra-white); margin-bottom: 6px; }
+    .preview-card .pc-desc { font-size: 13px; color: var(--indra-muted-teal); line-height: 1.5; }
+
+    @media (max-width: 1024px) { .preview-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+      .modal-sidebar { display: none; }
+      .modal-main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="modal-shell">
+    <nav class="modal-sidebar" aria-label="Main navigation">
+      <div class="logo-mark">PS</div>
+      <a class="nav-icon" href="dashboard.html" title="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </a>
+      <a class="nav-icon" href="tables.html" title="Deployment Registry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </a>
+      <div class="nav-icon active" title="Components">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg>
+      </div>
+      <a class="nav-icon" href="index.html" title="Design System">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      </a>
+    </nav>
+
+    <div class="modal-main">
+      <header class="modal-topbar">
+        <h1>PortalShift Intelligence</h1>
+        <div class="avatar" title="Ricardo Mendes">RM</div>
+      </header>
+
+      <main class="modal-content">
+        <h2>Component Library</h2>
+        <p class="subtitle">Interactive modal and dialog patterns — DSS v3.0 Corporate Standard</p>
+
+        <!-- Trigger Buttons -->
+        <div class="trigger-row">
+          <button class="trigger-btn primary" id="openConfirm">Open Deployment Confirm</button>
+          <button class="trigger-btn ghost" id="openForm">Open New Project Form</button>
+          <button class="trigger-btn danger" id="openAlert">Open Error Alert</button>
+        </div>
+
+        <!-- Static Preview Cards -->
+        <section class="preview-section">
+          <h3>Dialog Patterns</h3>
+          <p class="section-desc">Click the buttons above to interact with live modal instances. Each dialog follows the DSS v3.0 token system.</p>
+          <div class="preview-grid">
+            <div class="preview-card">
+              <div class="pc-label">Confirmation Dialog</div>
+              <div class="pc-title">Confirm Deployment</div>
+              <div class="pc-desc">Two-action dialog with deployment metadata summary. Primary action uses solid cyan, secondary uses ghost border. Both use 0px radius per DSS button spec.</div>
+            </div>
+            <div class="preview-card">
+              <div class="pc-label">Form Dialog</div>
+              <div class="pc-title">New Project</div>
+              <div class="pc-desc">Multi-field form with underline inputs. Focus state transitions border to --indra-cyan. Labels use uppercase 12px with 0.05em tracking per DSS typography spec.</div>
+            </div>
+            <div class="preview-card">
+              <div class="pc-label">Alert Dialog</div>
+              <div class="pc-title">Deployment Failed</div>
+              <div class="pc-desc">Error state with left border accent using --indra-error (#E91E63). Monospace error trace using Space Grotesk. Retry action uses error color fill.</div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- === CONFIRMATION MODAL === -->
+  <div class="modal-overlay" id="confirmOverlay">
+    <div class="modal-card modal-confirm" role="dialog" aria-labelledby="confirmTitle">
+      <button class="close-btn" aria-label="Close dialog">✕</button>
+      <div class="modal-header">
+        <h3 id="confirmTitle">Confirm Deployment</h3>
+      </div>
+      <div class="modal-body">
+        <p>You are about to deploy <strong>PortalShift Login v4.2.1</strong> to the production environment. This action will replace the current running version and cannot be undone without a manual rollback.</p>
+        <div class="deploy-info">
+          <div class="info-row"><span class="info-label">Target</span><span class="info-value">EU-West Production Cluster</span></div>
+          <div class="info-row"><span class="info-label">Build</span><span class="info-value">#8847 — passed all checks</span></div>
+          <div class="info-row"><span class="info-label">Artifact</span><span class="info-value">portalshift-login-4.2.1.tar.gz</span></div>
+          <div class="info-row"><span class="info-label">Estimated downtime</span><span class="info-value">0s (blue-green)</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="trigger-btn ghost close-modal">Cancel</button>
+        <button class="trigger-btn primary close-modal">Deploy Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === FORM MODAL === -->
+  <div class="modal-overlay" id="formOverlay">
+    <div class="modal-card modal-form" role="dialog" aria-labelledby="formTitle">
+      <button class="close-btn" aria-label="Close dialog">✕</button>
+      <div class="modal-header">
+        <h3 id="formTitle">New Project</h3>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label for="projName">Project Name</label>
+          <input type="text" id="projName" placeholder="e.g. Minsait Customer Portal">
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="projEnv">Target Environment</label>
+            <select id="projEnv">
+              <option>Production</option>
+              <option>Staging</option>
+              <option>Development</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="projOwner">Project Owner</label>
+            <input type="text" id="projOwner" placeholder="e.g. Ana Torres">
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="projDesc">Description</label>
+          <textarea id="projDesc" placeholder="Brief description of the project scope and objectives…"></textarea>
+        </div>
+        <div class="form-field">
+          <label for="projDS">Design System</label>
+          <select id="projDS">
+            <option>DSS v3.0 — Indra Corporate</option>
+            <option>DSS v2.1 — Legacy Minsait</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="trigger-btn ghost close-modal">Cancel</button>
+        <button class="trigger-btn primary close-modal">Create Project</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === ALERT MODAL === -->
+  <div class="modal-overlay" id="alertOverlay">
+    <div class="modal-card modal-alert" role="alertdialog" aria-labelledby="alertTitle">
+      <button class="close-btn" aria-label="Close dialog">✕</button>
+      <div class="modal-header">
+        <div class="alert-icon">⚠</div>
+        <h3 id="alertTitle">Deployment Failed</h3>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--indra-light-teal);margin:0 0 8px">Build <strong>#8844</strong> failed during the WCAG accessibility verification stage for <strong>Minsait Portal Rebrand</strong>.</p>
+        <div class="error-detail"><span class="err-line">ERROR</span> ContrastCheck — WCAG 2.2 AA violation
+  Element: .hero-subtitle
+  Foreground: #7A9CAE on Background: #003E50
+  Ratio: 3.8:1 (required: 4.5:1)
+
+<span class="err-line">ERROR</span> TouchTarget — interactive element below 44px
+  Element: .nav-link-small
+  Computed size: 32×28px
+
+Pipeline halted at stage 4/6 — accessibility gate.</div>
+      </div>
+      <div class="modal-footer">
+        <button class="trigger-btn ghost close-modal">Dismiss</button>
+        <button class="trigger-btn danger close-modal">Retry Build</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === MODAL OPEN/CLOSE ===
+    const modals = {
+      openConfirm: document.getElementById('confirmOverlay'),
+      openForm: document.getElementById('formOverlay'),
+      openAlert: document.getElementById('alertOverlay'),
+    };
+
+    Object.keys(modals).forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        modals[id].classList.add('show');
+      });
+    });
+
+    // Close on X button or Cancel/action button
+    document.querySelectorAll('.close-btn, .close-modal').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('show'));
+      });
+    });
+
+    // Close on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('show');
+      });
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('show'));
+      }
+    });
+  </script>
+</body>
+</html>

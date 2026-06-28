@@ -70,6 +70,9 @@ from tracing.schema import _schema_name as tracing_schema_name
 from tracing.schema import init_schema as init_tracing_schema
 
 from .settings import Settings
+from .provisioning import init_schema as init_provisioning_schema
+from .audit import AuditRepository
+from .audit import init_schema as init_audit_schema
 
 
 logger = logging.getLogger(__name__)
@@ -130,6 +133,7 @@ class AppState:
     settings: Settings
     registry_repo: AgentRegistryRepository
     registry_service: AgentRegistryService
+    audit_repo: AuditRepository
     finops_repo: FinOpsRepository
     finops_engine: FinOpsEngine
     trace_repo: TraceRepository
@@ -224,6 +228,16 @@ def build_state(settings: Settings | None = None) -> AppState:
         schema_name=tasks_api_schema_name(),
         init_schema=init_tasks_api_schema,
     )
+    provisioning_pool, provisioning_conn = _pooled_connection(
+        settings.database_url,
+        schema_name=os.environ.get("AOP_PROVISIONING_SCHEMA") or "aop_provisioning",
+        init_schema=init_provisioning_schema,
+    )
+    audit_pool, audit_conn = _pooled_connection(
+        settings.database_url,
+        schema_name="aop_audit",
+        init_schema=init_audit_schema,
+    )
 
     registry_repo = AgentRegistryRepository(registry_conn)
     registry_service = AgentRegistryService(
@@ -231,6 +245,7 @@ def build_state(settings: Settings | None = None) -> AppState:
         propagation=CompositePropagationHook.default(),
         enrolled_workspaces={"default", "workspace-main"},
     )
+    audit_repo = AuditRepository(audit_conn)
     finops_repo = FinOpsRepository(finops_conn)
     trace_repo = TraceRepository(tracing_conn)
     projects_repo = ProjectRepository(projects_conn)
@@ -284,6 +299,7 @@ def build_state(settings: Settings | None = None) -> AppState:
         settings=settings,
         registry_repo=registry_repo,
         registry_service=registry_service,
+        audit_repo=audit_repo,
         finops_repo=finops_repo,
         finops_engine=FinOpsEngine(finops_repo),
         trace_repo=trace_repo,
@@ -317,6 +333,8 @@ def build_state(settings: Settings | None = None) -> AppState:
             seats_api_conn,
             sessions_api_conn,
             tasks_api_conn,
+            provisioning_conn,
+            audit_conn,
         ],
         postgres_pools=[
             registry_pool,
@@ -329,6 +347,8 @@ def build_state(settings: Settings | None = None) -> AppState:
             seats_api_pool,
             sessions_api_pool,
             tasks_api_pool,
+            provisioning_pool,
+            audit_pool,
         ],
     )
 

@@ -1,0 +1,50 @@
+# NEW agent-detection manifest — agent "glm" (Kimchi CLI, model glm-5.2-fp8)
+# Installed to: ~/.config/herdr/agent-detection/glm.toml
+#
+# Why this file exists: pane w8:p15 (label KIMCHI-GLM52) joined the squad as a
+# coder. Herdr ships NO manifest for the Kimchi CLI (checked the 18 bundled/remote
+# manifests on 2026-06-26: amp, claude, cline, codex, copilot, cursor, devin, droid,
+# gemini, grok, hermes, kilo, kimi, kiro, opencode, pi, qodercli, agy — none match),
+# so Herdr reported agent=unknown and could not detect lifecycle state. This manifest
+# gives it the same management surface (idle/working/blocked) as the other coders.
+#
+# CREATE semantics: this is a brand-new manifest (not a fork), authored from a LIVE
+# capture, never a guess.
+# version MUST be dotted-numeric (Herdr rejects suffixes); .99 marks the local fork.
+id = "glm"
+version = "2026.06.26.99"
+min_engine_version = 1
+updated_at = "2026-06-26T00:00:00Z"
+aliases = ["kimchi", "kimchi-cli", "glm-5.2", "glm-5.2-fp8"]
+
+# ── IDLE (captured live 2026-06-26 from w8:p15) ─────────────────────────────────
+# The ready prompt shows TWO persistent signatures:
+#   footer input line: "ask anything or type / for commands"
+#   status line:       "default → shift+tab · glm-5.2-fp8 → ctrl+p"
+# We key on the model status line (most specific to this harness) and require the
+# input footer too. Low priority (50) so working/blocked always win if/when those
+# rules are added. `not` guards exclude any future working/blocker markers.
+[[rules]]
+id = "ready_prompt_idle"
+state = "idle"
+priority = 50
+region = "whole_recent"
+visible_idle = true
+all = [
+  { line_regex = ['glm-[0-9.]+(?:-\w+)?\s+→\s+ctrl\+p'] },
+  { contains = ["ask anything or type / for commands"] },
+]
+not = [
+  { contains = ["change permissions mode"] },
+]
+
+# ── WORKING / BLOCKED — NOT YET CAPTURED ────────────────────────────────────────
+# DELIBERATELY OMITTED. The Kimchi working-spinner glyph and the permission/confirm
+# blocker strings only appear while the agent is mid-task or prompting, which cannot
+# be observed without dispatching to the pane (out of scope: no agent dispatch).
+# DO NOT invent glyphs/strings here — that was the failure mode corrected on
+# 2026-06-26 (guessing instead of capturing live). When w8:p15 is next seen working
+# or blocked, capture via `herdr pane read w8:p15 --source detection` and add:
+#   [[rules]] id="glm_working"  state="working" priority=100 ... visible_working=true
+#   [[rules]] id="glm_blocked"  state="blocked" priority=300 ... visible_blocker=true
+# Until then, working/blocked rely on Herdr's generic engine; idle is rule-matched.

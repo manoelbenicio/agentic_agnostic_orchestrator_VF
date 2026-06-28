@@ -1,0 +1,337 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "AOP — FinOps and Tracing",
+  "uid": "aop-finops-tracing",
+  "tags": ["aop", "finops", "tracing", "control-plane"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "tenant",
+        "label": "Tenant",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "definition": "label_values(aop_finops_project_cost_usd, tenant_id)",
+        "query": "label_values(aop_finops_project_cost_usd, tenant_id)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "sort": 1
+      },
+      {
+        "name": "project",
+        "label": "Project",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "definition": "label_values(aop_finops_project_cost_usd{tenant_id=~\"$tenant\"}, project_id)",
+        "query": "label_values(aop_finops_project_cost_usd{tenant_id=~\"$tenant\"}, project_id)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "sort": 1
+      },
+      {
+        "name": "agent",
+        "label": "Agent",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "definition": "label_values(aop_trace_token_burn_total, agent_id)",
+        "query": "label_values(aop_trace_token_burn_total, agent_id)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "AOP Control Plane",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "AOP Metrics Up",
+      "description": "Prometheus scrape availability for :8090/metrics",
+      "gridPos": { "x": 0, "y": 1, "w": 6, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "up{job=\"aop-control-plane-metrics\"}", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": { "text": "UP", "color": "dark-green" },
+                "0": { "text": "DOWN", "color": "dark-red" }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "dark-red" },
+              { "value": 1, "color": "dark-green" }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none", "textMode": "auto" }
+    },
+    {
+      "type": "stat",
+      "title": "Control Plane Liveness",
+      "description": "aop_control_plane_up from the AOP metrics endpoint",
+      "gridPos": { "x": 6, "y": 1, "w": 6, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "aop_control_plane_up{job=\"aop-control-plane-metrics\"}", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": { "text": "OK", "color": "dark-green" },
+                "0": { "text": "DOWN", "color": "dark-red" }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "dark-red" },
+              { "value": 1, "color": "dark-green" }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none", "textMode": "auto" }
+    },
+    {
+      "type": "stat",
+      "title": "Total Project Cost",
+      "description": "Current FinOps total cost across selected projects",
+      "gridPos": { "x": 12, "y": 1, "w": 6, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "sum(aop_finops_project_cost_usd{job=\"aop-control-plane-metrics\",tenant_id=~\"$tenant\",project_id=~\"$project\",engine=\"total\"})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 4,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "semi-dark-blue" },
+              { "value": 10, "color": "dark-yellow" },
+              { "value": 100, "color": "dark-red" }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+    {
+      "type": "stat",
+      "title": "Cost Records",
+      "description": "FinOps cost records in selected projects",
+      "gridPos": { "x": 18, "y": 1, "w": 6, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "sum(aop_finops_project_cost_records{job=\"aop-control-plane-metrics\",tenant_id=~\"$tenant\",project_id=~\"$project\"})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "semi-dark-blue" },
+              { "value": 1, "color": "dark-green" }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "area", "textMode": "value_and_name" }
+    },
+    {
+      "type": "row",
+      "title": "FinOps",
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Project Cost by Engine",
+      "description": "Total, token, and seat cost by selected tenant/project",
+      "gridPos": { "x": 0, "y": 7, "w": 16, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "sum by (engine) (aop_finops_project_cost_usd{job=\"aop-control-plane-metrics\",tenant_id=~\"$tenant\",project_id=~\"$project\"})",
+          "refId": "A",
+          "legendFormat": "{{engine}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 4,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "type": "table",
+      "title": "FinOps Snapshot",
+      "description": "Latest project cost split exposed by the AOP control-plane",
+      "gridPos": { "x": 16, "y": 7, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "aop_finops_project_cost_usd{job=\"aop-control-plane-metrics\",tenant_id=~\"$tenant\",project_id=~\"$project\"}",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "job": true,
+              "instance": true
+            },
+            "renameByName": {
+              "tenant_id": "Tenant",
+              "project_id": "Project",
+              "engine": "Engine",
+              "Value": "Cost USD"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "center", "cellOptions": { "type": "auto" } },
+          "decimals": 4
+        }
+      },
+      "options": { "showHeader": true }
+    },
+    {
+      "type": "row",
+      "title": "Tracing",
+      "gridPos": { "x": 0, "y": 15, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Token Burn Rate by Agent",
+      "description": "Per-agent token burn rate from tracing events",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "sum by (agent_id) (rate(aop_trace_token_burn_total{job=\"aop-control-plane-metrics\",agent_id=~\"$agent\"}[5m]))",
+          "refId": "A",
+          "legendFormat": "{{agent_id}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "tok/s",
+          "decimals": 2,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Seat Seconds Rate by Agent",
+      "description": "Per-agent seat usage rate from tracing events",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "sum by (agent_id) (rate(aop_trace_seat_seconds_total{job=\"aop-control-plane-metrics\",agent_id=~\"$agent\"}[5m]))",
+          "refId": "A",
+          "legendFormat": "{{agent_id}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s/s",
+          "decimals": 2,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    }
+  ]
+}

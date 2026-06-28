@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitetura Animada: Herdr & HerdMaster</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.5);
+            --node-infra: #3b82f6;
+            --node-core: #8b5cf6;
+            --node-sys: #10b981;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            width: 100%;
+            padding: 20px 40px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .btn:hover {
+            background: #0ea5e9;
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--accent-glow);
+        }
+
+        main {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 1000px;
+            height: 700px;
+        }
+
+        /* Connecting Lines */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .line {
+            fill: none;
+            stroke: rgba(255,255,255,0.15);
+            stroke-width: 2;
+        }
+
+        .line-animated {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 3;
+            stroke-dasharray: 10 15;
+            animation: dash 1s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -25;
+            }
+        }
+
+        /* Nodes */
+        .node {
+            position: absolute;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            width: 140px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            z-index: 2;
+            transform: translate(-50%, -50%);
+        }
+
+        .node:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+            z-index: 3;
+        }
+
+        .node .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .node .title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .node .desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Colored top borders based on category */
+        .node.infra { border-top: 4px solid var(--node-infra); }
+        .node.core { border-top: 4px solid var(--node-core); }
+        .node.sys { border-top: 4px solid var(--node-sys); }
+
+        /* Data Particles */
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 15px 5px var(--accent-glow);
+            opacity: 0;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Group Boxes */
+        .group-box {
+            position: absolute;
+            border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.02);
+            z-index: 1;
+            pointer-events: none;
+        }
+        .group-label {
+            position: absolute;
+            top: -25px;
+            left: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Positions */
+        #node-user { top: 50px; left: 500px; }
+        
+        /* HerdMaster Group */
+        #box-herdmaster { top: 150px; left: 150px; width: 700px; height: 180px; }
+        #node-api { top: 240px; left: 250px; }
+        #node-watchdog { top: 240px; left: 500px; }
+        #node-db { top: 240px; left: 750px; }
+
+        /* Socket Layer */
+        #node-socket { top: 400px; left: 500px; border-radius: 30px; width: 160px;}
+
+        /* Herdr Group */
+        #box-herdr { top: 480px; left: 150px; width: 700px; height: 180px; }
+        #node-daemon { top: 570px; left: 250px; }
+        #node-pane1 { top: 570px; left: 500px; }
+        #node-pane2 { top: 570px; left: 750px; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Arquitetura de Referência: Herdr & HerdMaster</h1>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Visualização Interativa de Fluxo de Dados E2E</div>
+        </div>
+        <button class="btn" id="btn-simulate" onclick="simulateFlow()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Simular Fluxo de Agente
+        </button>
+    </header>
+
+    <main>
+        <div class="canvas-container">
+            
+            <!-- SVGs for static and animated lines -->
+            <svg id="lines-svg">
+                <!-- Lines will be injected by JS -->
+            </svg>
+
+            <!-- Group Boxes -->
+            <div id="box-herdmaster" class="group-box">
+                <div class="group-label">Control Plane (HerdMaster)</div>
+            </div>
+            <div id="box-herdr" class="group-box">
+                <div class="group-label">Infraestrutura (Herdr)</div>
+            </div>
+
+            <!-- Nodes -->
+            <div id="node-user" class="node sys">
+                <div class="icon">🧑‍💻</div>
+                <div class="title">Usuário / CLI</div>
+                <div class="desc">Inicia comandos</div>
+            </div>
+
+            <div id="node-api" class="node core">
+                <div class="icon">🌐</div>
+                <div class="title">API REST</div>
+                <div class="desc">TCP 127.0.0.1:8080</div>
+            </div>
+
+            <div id="node-watchdog" class="node core">
+                <div class="icon">👁️</div>
+                <div class="title">Watchdog</div>
+                <div class="desc">Gerencia ciclo de vida</div>
+            </div>
+
+            <div id="node-db" class="node core">
+                <div class="icon">🗄️</div>
+                <div class="title">SQLite</div>
+                <div class="desc">Persistência local</div>
+            </div>
+
+            <div id="node-socket" class="node sys" style="padding: 10px;">
+                <div class="icon">🔌</div>
+                <div class="title">Unix Socket</div>
+                <div class="desc">herdr.sock</div>
+            </div>
+
+            <div id="node-daemon" class="node infra">
+                <div class="icon">⚙️</div>
+                <div class="title">Herdr Daemon</div>
+                <div class="desc">Multiplexador Rust</div>
+            </div>
+
+            <div id="node-pane1" class="node infra">
+                <div class="icon">🖥️</div>
+                <div class="title">Pane 1 (Agente)</div>
+                <div class="desc">Processo isolado (PTY)</div>
+            </div>
+
+            <div id="node-pane2" class="node infra">
+                <div class="icon">🖥️</div>
+                <div class="title">Pane 2 (Agente)</div>
+                <div class="desc">Processo isolado (PTY)</div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const connections = [
+            { from: 'node-user', to: 'node-api', id: 'path-user-api' },
+            { from: 'node-api', to: 'node-watchdog', id: 'path-api-watchdog' },
+            { from: 'node-watchdog', to: 'node-db', id: 'path-watchdog-db' },
+            { from: 'node-watchdog', to: 'node-socket', id: 'path-watchdog-socket' },
+            { from: 'node-socket', to: 'node-daemon', id: 'path-socket-daemon' },
+            { from: 'node-daemon', to: 'node-pane1', id: 'path-daemon-pane1' },
+            { from: 'node-daemon', to: 'node-pane2', id: 'path-daemon-pane2' }
+        ];
+
+        const svg = document.getElementById('lines-svg');
+
+        // Draw connections
+        function drawLines() {
+            svg.innerHTML = ''; // clear
+            connections.forEach(conn => {
+                const el1 = document.getElementById(conn.from);
+                const el2 = document.getElementById(conn.to);
+
+                const rect1 = {
+                    x: parseInt(el1.style.left),
+                    y: parseInt(el1.style.top)
+                };
+                const rect2 = {
+                    x: parseInt(el2.style.left),
+                    y: parseInt(el2.style.top)
+                };
+
+                // Create path string (curved line)
+                const pathStr = `M ${rect1.x} ${rect1.y} C ${rect1.x} ${(rect1.y + rect2.y)/2}, ${rect2.x} ${(rect1.y + rect2.y)/2}, ${rect2.x} ${rect2.y}`;
+
+                // Static background line
+                const pathBg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                pathBg.setAttribute('d', pathStr);
+                pathBg.setAttribute('class', 'line');
+                svg.appendChild(pathBg);
+
+                // Animated foreground line
+                const pathAnim = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                pathAnim.setAttribute('d', pathStr);
+                pathAnim.setAttribute('class', 'line-animated');
+                pathAnim.setAttribute('id', conn.id);
+                svg.appendChild(pathAnim);
+            });
+        }
+
+        // Initialize positions (extracting from CSS for JS calculations)
+        document.querySelectorAll('.node').forEach(node => {
+            const style = window.getComputedStyle(node);
+            node.style.top = style.top;
+            node.style.left = style.left;
+        });
+
+        drawLines();
+
+        let isAnimating = false;
+
+        async function simulateFlow() {
+            if(isAnimating) return;
+            isAnimating = true;
+            const btn = document.getElementById('btn-simulate');
+            btn.innerHTML = 'Animando...';
+            btn.style.opacity = '0.7';
+
+            // Sequence of paths to animate
+            const flow = [
+                'path-user-api',
+                'path-api-watchdog',
+                'path-watchdog-db',
+                'path-watchdog-socket',
+                'path-socket-daemon',
+                'path-daemon-pane1'
+            ];
+
+            for(let pathId of flow) {
+                const pathEl = document.getElementById(pathId);
+                pathEl.style.opacity = '1';
+                
+                // create particle
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                document.querySelector('.canvas-container').appendChild(particle);
+
+                // animate particle along path
+                await animateParticle(particle, pathEl, 800);
+                
+                pathEl.style.opacity = '0';
+                particle.remove();
+            }
+
+            // Simulate parallel processing (Herdr to both Panes)
+            const p1 = document.getElementById('path-daemon-pane1');
+            const p2 = document.getElementById('path-daemon-pane2');
+            p1.style.opacity = '1';
+            p2.style.opacity = '1';
+
+            const part1 = document.createElement('div');
+            part1.className = 'particle';
+            const part2 = document.createElement('div');
+            part2.className = 'particle';
+            
+            document.querySelector('.canvas-container').appendChild(part1);
+            document.querySelector('.canvas-container').appendChild(part2);
+
+            await Promise.all([
+                animateParticle(part1, p1, 800),
+                animateParticle(part2, p2, 800)
+            ]);
+
+            p1.style.opacity = '0';
+            p2.style.opacity = '0';
+            part1.remove();
+            part2.remove();
+
+            // Blink Panes to show "Working"
+            document.getElementById('node-pane1').style.borderColor = 'var(--accent)';
+            document.getElementById('node-pane2').style.borderColor = 'var(--accent)';
+            
+            setTimeout(() => {
+                document.getElementById('node-pane1').style.borderColor = 'rgba(255,255,255,0.1)';
+                document.getElementById('node-pane2').style.borderColor = 'rgba(255,255,255,0.1)';
+                
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Simular Fluxo de Agente';
+                btn.style.opacity = '1';
+                isAnimating = false;
+            }, 1000);
+        }
+
+        function animateParticle(particle, path, duration) {
+            return new Promise(resolve => {
+                const length = path.getTotalLength();
+                let start = null;
+
+                function step(timestamp) {
+                    if (!start) start = timestamp;
+                    const progress = timestamp - start;
+                    const percent = Math.min(progress / duration, 1);
+                    
+                    const point = path.getPointAtLength(percent * length);
+                    particle.style.left = point.x + 'px';
+                    particle.style.top = point.y + 'px';
+                    particle.style.opacity = percent < 0.1 ? percent * 10 : (percent > 0.9 ? (1-percent)*10 : 1);
+                    particle.style.transform = 'translate(-50%, -50%)';
+
+                    if (progress < duration) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        resolve();
+                    }
+                }
+                window.requestAnimationFrame(step);
+            });
+        }
+    </script>
+</body>
+</html>

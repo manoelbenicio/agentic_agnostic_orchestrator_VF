@@ -1,0 +1,15 @@
+fastapi==0.115.6
+google-auth==2.38.0
+litellm==1.80.8
+opentelemetry-api==1.30.0
+opentelemetry-exporter-otlp==1.30.0
+opentelemetry-instrumentation-fastapi==0.51b0
+opentelemetry-sdk==1.30.0
+prometheus-client==0.21.1
+structlog==25.1.0
+uvicorn[standard]==0.34.0
+httpx==0.27.0
+PyJWT==2.8.0
+python-docx==1.1.2
+python-multipart==0.0.20
+pypdf==5.1.0

@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agnostic Orchestration Platform — Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --card:#ffffff;
+  --text:#191c24; --muted:#677084; --faint:#9aa1b1;
+  --border:#e7e9ee; --border-2:#dfe2e9; --sidebar:#fbfbfd;
+  --primary:#4f46e5; --primary-weak:#eef0fe; --primary-text:#ffffff;
+  --ok:#16a34a; --ok-weak:#e7f6ed; --warn:#d97706; --warn-weak:#fdf1e1;
+  --err:#dc2626; --err-weak:#fdecec; --info:#2563eb; --info-weak:#e9f0fe;
+  --accent:#7c3aed;
+  --shadow:0 1px 2px rgba(20,22,35,.04),0 2px 8px rgba(20,22,35,.06);
+  --shadow-lg:0 10px 30px rgba(20,22,35,.10);
+  --r:12px; --r-sm:8px; --r-pill:999px;
+}
+[data-theme="dark"]{
+  --bg:#0f1218; --surface:#161a22; --card:#171b24;
+  --text:#e9ecf3; --muted:#9aa3b4; --faint:#6b7387;
+  --border:#262c38; --border-2:#2f3744; --sidebar:#11151c;
+  --primary:#7c83f3; --primary-weak:#20243a; --primary-text:#0f1218;
+  --ok:#34d27b; --ok-weak:#16261d; --warn:#f0b048; --warn-weak:#2a2113;
+  --err:#f06363; --err-weak:#2a1717; --info:#5b8cf0; --info-weak:#151f33;
+  --accent:#a98bff;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 10px rgba(0,0,0,.35);
+  --shadow-lg:0 16px 40px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:color-mix(in srgb,var(--primary) 28%,transparent)}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:9px;border:2px solid var(--bg)}
+
+/* layout */
+.app{display:grid;grid-template-columns:256px 1fr;height:100vh}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+.brand{display:flex;align-items:center;gap:10px;height:60px;padding:0 16px;border-bottom:1px solid var(--border)}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;color:#fff;font-weight:700;box-shadow:var(--shadow)}
+.brand b{font-size:13px;font-weight:600}.brand small{display:block;color:var(--muted);font-size:11px}
+.ws{margin:12px;padding:8px 10px;border:1px solid var(--border);background:var(--card);border-radius:var(--r-sm);display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500}
+.ws .av{width:20px;height:20px;border-radius:5px;background:var(--primary-weak);color:var(--primary);display:grid;place-items:center;font-size:10px;font-weight:700}
+.ws .ic{margin-left:auto;color:var(--faint)}
+nav{flex:1;overflow:auto;padding:6px 12px 16px}
+.navgroup{margin-top:14px}
+.navgroup .lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);padding:0 8px 6px}
+.navi{position:relative;display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer}
+.navi:hover{background:color-mix(in srgb,var(--primary-weak) 60%,transparent);color:var(--text)}
+.navi.active{background:var(--primary-weak);color:var(--text);font-weight:600}
+.navi.active::before{content:"";position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:3px;height:18px;border-radius:0 3px 3px 0;background:var(--primary)}
+.navi .dot{margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
+.navi .cnt{margin-left:auto;background:var(--primary-weak);color:var(--primary);font-size:10px;font-weight:700;border-radius:999px;padding:1px 7px}
+.svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8}
+.userbox{border-top:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px}
+.userbox .ua{width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+
+/* main */
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{height:60px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(8px);display:flex;align-items:center;gap:14px;padding:0 22px;position:sticky;top:0;z-index:5}
+.topbar .ctx b{font-size:13px;font-weight:600}.topbar .ctx small{display:block;color:var(--muted);font-size:11px}
+.search{margin:0 auto;width:min(480px,40vw);display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:8px 12px;color:var(--muted);box-shadow:var(--shadow)}
+.search kbd{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:10px;border:1px solid var(--border-2);border-radius:5px;padding:1px 6px;color:var(--faint)}
+.tb-actions{display:flex;align-items:center;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:var(--r-pill);padding:5px 11px;font-size:12px;font-weight:600;border:1px solid var(--border)}
+.pill.ok{background:var(--ok-weak);color:var(--ok);border-color:transparent}
+.iconbtn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--card);display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.iconbtn:hover{color:var(--text);border-color:var(--border-2)}
+.content{flex:1;overflow:auto;padding:26px 30px}
+.screen{display:none;animation:fade .25s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* primitives */
+.h1{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:0}
+.sub{color:var(--muted);font-size:13px;margin:3px 0 0}
+.pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+.btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);font-weight:600;font-size:13px;cursor:pointer;box-shadow:var(--shadow)}
+.btn:hover{border-color:var(--border-2)}
+.btn.primary{background:var(--primary);color:var(--primary-text);border-color:transparent}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.ghost{background:transparent;box-shadow:none;border-color:transparent;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+.card.p{padding:18px}
+.grid{display:grid;gap:16px}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:var(--r-pill)}
+.tag.g{background:var(--ok-weak);color:var(--ok)} .tag.a{background:var(--warn-weak);color:var(--warn)}
+.tag.r{background:var(--err-weak);color:var(--err)} .tag.b{background:var(--info-weak);color:var(--info)}
+.tag.n{background:var(--primary-weak);color:var(--primary)} .tag.m{background:color-mix(in srgb,var(--muted) 14%,transparent);color:var(--muted)}
+.kpi{display:flex;flex-direction:column;gap:8px}
+.kpi .k{font-size:12px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:7px}
+.kpi .v{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.kpi .d{font-size:12px;font-weight:600}
+.spark{height:34px;display:flex;align-items:flex-end;gap:3px}
+.spark i{flex:1;background:var(--primary-weak);border-radius:3px}
+.sechead{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+.sechead h3{font-size:14px;font-weight:600;margin:0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:10px 14px;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:color-mix(in srgb,var(--primary-weak) 40%,transparent)}
+.avatar{width:26px;height:26px;border-radius:7px;display:inline-grid;place-items:center;color:#fff;font-size:11px;font-weight:700}
+.dotstate{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:middle}
+.bar{height:7px;border-radius:5px;background:var(--border);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--primary);border-radius:5px}
+.empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:60px;text-align:center;color:var(--muted)}
+
+/* kanban */
+.kanban{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px}
+.kcol{flex:0 0 270px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+.kcol .kh{display:flex;align-items:center;gap:8px;padding:12px 14px;font-weight:600;font-size:13px;border-bottom:1px solid var(--border)}
+.kcol .kh .num{margin-left:auto;color:var(--faint);font-weight:600}
+.kbody{padding:10px;display:flex;flex-direction:column;gap:10px;min-height:60px}
+.kcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;box-shadow:var(--shadow);cursor:grab}
+.kcard:hover{border-color:var(--border-2)}
+.kcard .id{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint)}
+.kcard .t{font-weight:500;margin:5px 0 9px;font-size:13px}
+.kcard .meta{display:flex;align-items:center;gap:8px}
+
+/* squad canvas */
+.canvas{position:relative;height:420px;border:1px dashed var(--border-2);border-radius:var(--r);background:
+  radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0) 0 0/22px 22px;overflow:hidden}
+.node{position:absolute;width:150px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);padding:10px 12px}
+.node.tl{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-weak),var(--shadow)}
+.node .nt{font-weight:600;font-size:12px;display:flex;align-items:center;gap:6px}
+.node .ns{font-size:11px;color:var(--muted);margin-top:3px}
+.node .badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--primary-weak);color:var(--primary);margin-left:auto}
+
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px}
+.tabs button{border:none;background:transparent;color:var(--muted);font-weight:600;font-size:12px;padding:6px 12px;border-radius:7px;cursor:pointer}
+.tabs button.active{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.modes{display:flex;flex-direction:column;gap:14px}
+.mode{display:flex;gap:11px}.mode .mi{width:30px;height:30px;border-radius:8px;background:var(--primary-weak);color:var(--primary);display:grid;place-items:center;flex:none}
+.mode b{font-size:13px}.mode small{display:block;color:var(--muted);font-size:12px}
+.trace{font-family:"JetBrains Mono",monospace;font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;height:300px;overflow:auto;line-height:1.7}
+.trace .ts{color:var(--faint)} .trace .tk{color:var(--info)} .trace .tw{color:var(--warn)} .trace .td{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">◧</div>
+      <div><b>AOP Control</b><small>Local-first runtime</small></div>
+    </div>
+    <div class="ws"><span class="av">T</span> tenant-a <svg class="svg ic" viewBox="0 0 24 24"><path d="M7 9l5 5 5-5"/></svg></div>
+    <nav>
+      <div class="navgroup"><div class="lbl">Visão geral</div>
+        <div class="navi active" data-s="dashboard"><svg class="svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</div>
+        <div class="navi" data-s="projects"><svg class="svg" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></svg> Projects</div>
+        <div class="navi" data-s="issues"><svg class="svg" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg> Issues</div>
+      </div>
+      <div class="navgroup"><div class="lbl">Construir</div>
+        <div class="navi" data-s="squad"><svg class="svg" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="19" r="2.4"/><circle cx="19" cy="19" r="2.4"/><path d="M12 7.4v4M11 13l-4 4M13 13l4 4"/></svg> Squad Builder</div>
+        <div class="navi" data-s="agents"><svg class="svg" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-5-5.9"/></svg> Agents</div>
+      </div>
+      <div class="navgroup"><div class="lbl">Operar</div>
+        <div class="navi" data-s="live"><svg class="svg" viewBox="0 0 24 24"><path d="M5 12a7 7 0 0 1 14 0M8.5 12a3.5 3.5 0 0 1 7 0"/><circle cx="12" cy="12" r="1.4"/></svg> Live Panel <span class="dot"></span></div>
+        <div class="navi" data-s="seats"><svg class="svg" viewBox="0 0 24 24"><path d="M14 7a3 3 0 1 1 4 2.8V13l-2 2-2-2 1.5-1.5"/><circle cx="7" cy="9" r="3"/><path d="M2 20a5 5 0 0 1 10 0"/></svg> Seats</div>
+        <div class="navi" data-s="sessions"><svg class="svg" viewBox="0 0 24 24"><path d="M9 7H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h4M15 7h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-4M8 12h8"/></svg> Sessions</div>
+        <div class="navi" data-s="finops"><svg class="svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg> FinOps</div>
+        <div class="navi" data-s="observ"><svg class="svg" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 18 0"/><path d="M12 12l4-2"/></svg> Observability</div>
+      </div>
+      <div class="navgroup"><div class="lbl">Workspace</div>
+        <div class="navi" data-s="skills"><svg class="svg" viewBox="0 0 24 24"><path d="M12 3l2.2 5.5L20 9l-4 3.8L17 19l-5-3-5 3 1-6.2L4 9l5.8-.5z"/></svg> Skills</div>
+        <div class="navi" data-s="inbox"><svg class="svg" viewBox="0 0 24 24"><path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 6h14l2 6v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z"/></svg> Inbox <span class="cnt">3</span></div>
+        <div class="navi" data-s="settings"><svg class="svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.4 2h-4l-.4 2.4a7 7 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 1.7 1l.4 2.4h4l.4-2.4a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6a7 7 0 0 0 .1-1z"/></svg> Settings</div>
+      </div>
+    </nav>
+    <div class="userbox"><div class="ua">M</div><div><div style="font-size:13px;font-weight:600">manoelbenicio</div><div style="font-size:11px;color:var(--muted)">Operador</div></div></div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="ctx"><b>Agnostic Orchestration Platform</b><small>HerdMaster + Herdr runtime</small></div>
+      <div class="search"><svg class="svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg> Buscar issues, projetos, agentes… <kbd>Ctrl K</kbd></div>
+      <div class="tb-actions">
+        <span class="pill ok"><span class="dotstate" style="background:var(--ok)"></span>API ok · coupling connected</span>
+        <button class="iconbtn" onclick="toggleTheme()" title="Tema"><svg class="svg" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+        <div class="avatar" style="background:var(--accent)">M</div>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section class="screen active" id="s-dashboard">
+        <div class="pagehead"><div><h1 class="h1">Dashboard</h1><p class="sub">Visão operacional do workspace tenant-a.</p></div>
+          <div style="display:flex;gap:8px"><button class="btn">Open workspace</button><button class="btn primary">+ Nova Task</button></div></div>
+        <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="card p kpi"><div class="k">◷ Agentes ativos</div><div class="v">9</div><div class="d" style="color:var(--ok)">▲ 2 vs ontem</div></div>
+          <div class="card p kpi"><div class="k">⚷ Seats em uso</div><div class="v">6/15</div><div class="d" style="color:var(--muted)">40% utilização</div></div>
+          <div class="card p kpi"><div class="k">✓ Tasks (24h)</div><div class="v">128</div><div class="d" style="color:var(--ok)">▲ 18%</div></div>
+          <div class="card p kpi"><div class="k">$ Custo (24h)</div><div class="v">$42.18</div><div class="spark"><i style="height:40%"></i><i style="height:60%"></i><i style="height:35%"></i><i style="height:80%"></i><i style="height:55%"></i><i style="height:90%"></i><i style="height:70%"></i></div></div>
+        </div>
+        <div class="grid" style="grid-template-columns:2fr 1fr;margin-top:16px">
+          <div class="card p">
+            <div class="sechead"><h3>Agentes</h3><a class="tag n" style="cursor:pointer">Ver todos</a></div>
+            <table><thead><tr><th>Agente</th><th>Vendor</th><th>Papel</th><th>Estado</th><th>Burn</th></tr></thead><tbody>
+              <tr><td><span class="avatar" style="background:#4f46e5">K</span> Kiro_Opus-48</td><td>Kiro</td><td><span class="tag n">Tech-Lead</span></td><td><span class="dotstate" style="background:var(--warn)"></span>working</td><td class="mono">3.1k tok</td></tr>
+              <tr><td><span class="avatar" style="background:#16a34a">C</span> Codex #1</td><td>OpenAI</td><td><span class="tag m">worker</span></td><td><span class="dotstate" style="background:var(--ok)"></span>idle</td><td class="mono">820 tok</td></tr>
+              <tr><td><span class="avatar" style="background:#7c3aed">A</span> AGY_Opus-46</td><td>Antigravity</td><td><span class="tag m">worker</span></td><td><span class="dotstate" style="background:var(--warn)"></span>working</td><td class="mono">2.4k tok</td></tr>
+              <tr><td><span class="avatar" style="background:#2563eb">G</span> Gemini Flash</td><td>Google</td><td><span class="tag m">worker</span></td><td><span class="dotstate" style="background:var(--err)"></span>blocked</td><td class="mono">1.1k tok</td></tr>
+            </tbody></table>
+          </div>
+          <div class="card p">
+            <div class="sechead"><h3>Modos de execução</h3></div>
+            <div class="modes">
+              <div class="mode"><div class="mi">�term</div><div><b>Terminal</b><small>Panes do Herdr, execução local-first.</small></div></div>
+              <div class="mode"><div class="mi">⇄</div><div><b>Socket</b><small>Control-plane: claim, dispatch, lifecycle.</small></div></div>
+              <div class="mode"><div class="mi">⬡</div><div><b>Visual builder</b><small>Editor de topologia drag-and-drop.</small></div></div>
+            </div>
+            <div class="sechead" style="margin-top:18px"><h3>Seat Pool</h3><span class="tag g">6/15 leased</span></div>
+            <div class="bar"><i style="width:40%"></i></div>
+            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+              <span class="tag m">5× Codex</span><span class="tag m">5× Antigravity</span><span class="tag m">5× Kiro</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJECTS -->
+      <section class="screen" id="s-projects">
+        <div class="pagehead"><div><h1 class="h1">Projects</h1><p class="sub">Agrupe trabalho por sprint, epic ou workstream.</p></div>
+          <div style="display:flex;gap:8px"><div class="tabs"><button class="active">Board</button><button>Lista</button></div><button class="btn primary">+ Novo Projeto</button></div></div>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="card p"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="background:#16a34a">P</span><b>Portal Web</b><span class="tag g" style="margin-left:auto">Ativo</span></div><p class="sub">Front-end do portal do cliente.</p><div class="bar" style="margin-top:12px"><i style="width:40%"></i></div><div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px;color:var(--muted)"><span>12/30 issues</span><span>lead: Kiro</span></div></div>
+          <div class="card p"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="background:#d97706">M</span><b>Migração API</b><span class="tag a" style="margin-left:auto">Pausado</span></div><p class="sub">Migração de serviços legados.</p><div class="bar" style="margin-top:12px"><i style="width:33%"></i></div><div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px;color:var(--muted)"><span>3/9 issues</span><span>lead: —</span></div></div>
+          <div class="card p"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="background:#4f46e5">R</span><b>Refactor Auth</b><span class="tag b" style="margin-left:auto">Concluído</span></div><p class="sub">OAuth device flow + RBAC.</p><div class="bar" style="margin-top:12px"><i style="width:100%"></i></div><div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px;color:var(--muted)"><span>9/9 issues</span><span>lead: AGY</span></div></div>
+        </div>
+      </section>
+
+      <!-- ISSUES -->
+      <section class="screen" id="s-issues">
+        <div class="pagehead"><div><h1 class="h1">Issues</h1><p class="sub">Crie, despache e acompanhe tarefas dos agentes.</p></div>
+          <div style="display:flex;gap:8px"><div class="tabs"><button class="active">Board</button><button>Lista</button><button>Swimlane</button><button>Gantt</button></div><button class="btn primary">+ Nova Task</button></div></div>
+        <div class="kanban">
+          <div class="kcol"><div class="kh">Backlog <span class="num">4</span></div><div class="kbody">
+            <div class="kcard"><div class="id">AOP-101</div><div class="t">Configurar pgvector</div><div class="meta"><span class="tag b">terminal</span><span class="avatar" style="background:#16a34a;margin-left:auto">C</span></div></div>
+            <div class="kcard"><div class="id">AOP-104</div><div class="t">Exportar custos CSV</div><div class="meta"><span class="tag n">socket</span></div></div>
+          </div></div>
+          <div class="kcol"><div class="kh">Todo <span class="num">2</span></div><div class="kbody">
+            <div class="kcard"><div class="id">AOP-110</div><div class="t">Tela de Sessions OAuth</div><div class="meta"><span class="tag n">socket</span><span class="avatar" style="background:#7c3aed;margin-left:auto">A</span></div></div>
+          </div></div>
+          <div class="kcol"><div class="kh">In Progress <span class="num">3</span></div><div class="kbody">
+            <div class="kcard"><div class="id">AOP-088</div><div class="t">Topologia hub-and-spoke</div><div class="meta"><span class="tag b">terminal</span><span class="tag a">running</span><span class="avatar" style="background:#4f46e5;margin-left:auto">K</span></div></div>
+            <div class="kcard"><div class="id">AOP-092</div><div class="t">FinOps rollup por projeto</div><div class="meta"><span class="tag n">socket</span><span class="tag a">running</span></div></div>
+          </div></div>
+          <div class="kcol"><div class="kh">In Review <span class="num">1</span></div><div class="kbody">
+            <div class="kcard"><div class="id">AOP-080</div><div class="t">Live trace WebSocket</div><div class="meta"><span class="tag b">terminal</span><span class="avatar" style="background:#2563eb;margin-left:auto">G</span></div></div>
+          </div></div>
+          <div class="kcol"><div class="kh">Blocked <span class="num">1</span></div><div class="kbody">
+            <div class="kcard" style="border-color:var(--err)"><div class="id">AOP-077</div><div class="t">Quota Antigravity 503</div><div class="meta"><span class="tag r">blocked</span></div></div>
+          </div></div>
+          <div class="kcol"><div class="kh">Done <span class="num">22</span></div><div class="kbody">
+            <div class="kcard"><div class="id">AOP-070</div><div class="t">Migração Postgres</div><div class="meta"><span class="tag g">done</span></div></div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- SQUAD BUILDER -->
+      <section class="screen" id="s-squad">
+        <div class="pagehead"><div><h1 class="h1">Squad Builder</h1><p class="sub">Monte a squad e defina quem fala com quem (topologia → ACL).</p></div>
+          <div style="display:flex;gap:8px"><button class="btn">Validar</button><button class="btn primary">Salvar</button></div></div>
+        <div class="grid" style="grid-template-columns:200px 1fr">
+          <div class="card p"><div class="sechead"><h3>Paleta</h3></div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn">+ Codex</button><button class="btn">+ Antigravity</button><button class="btn">+ Gemini</button><button class="btn">+ Kiro</button></div>
+            <div style="margin-top:16px;font-size:12px;color:var(--muted)">Nó selecionado: <b style="color:var(--text)">Codex #1</b></div>
+            <div style="display:flex;gap:6px;margin-top:8px"><button class="btn ghost" style="border:1px solid var(--border)">↑ Tech-Lead</button><button class="btn ghost" style="border:1px solid var(--err);color:var(--err)">Excluir</button></div>
+          </div>
+          <div class="canvas">
+            <svg style="position:absolute;inset:0;width:100%;height:100%;stroke:var(--border-2);stroke-width:2;fill:none">
+              <path d="M250 90 L130 250"/><path d="M250 90 L250 250"/><path d="M250 90 L380 250"/><path d="M250 90 L500 250"/>
+            </svg>
+            <div class="node tl" style="left:185px;top:50px"><div class="nt">★ Kiro_Opus-48 <span class="badge">TL</span></div><div class="ns">orchestrator</div></div>
+            <div class="node" style="left:60px;top:250px"><div class="nt">Codex #1</div><div class="ns">worker · idle</div></div>
+            <div class="node" style="left:185px;top:250px"><div class="nt">AGY_Opus-46</div><div class="ns">worker · working</div></div>
+            <div class="node" style="left:315px;top:250px"><div class="nt">Gemini Flash</div><div class="ns">worker · blocked</div></div>
+            <div class="node" style="left:440px;top:250px"><div class="nt">Codex #2</div><div class="ns">worker · idle</div></div>
+          </div>
+        </div>
+        <p class="sub" style="margin-top:12px">Padrão <b>hub-and-spoke</b>: o Tech-Lead fala com todos; agentes não falam entre si sem concessão explícita (default-deny).</p>
+      </section>
+
+      <!-- LIVE -->
+      <section class="screen" id="s-live">
+        <div class="pagehead"><div><h1 class="h1">Live Panel</h1><p class="sub">Tracing em tempo real por agente e runtime.</p></div>
+          <span class="pill ok"><span class="dotstate" style="background:var(--ok)"></span>streaming (WS)</span></div>
+        <div class="grid" style="grid-template-columns:240px 1fr">
+          <div class="card p"><div class="sechead"><h3>Agentes</h3></div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div class="navi active"><span class="dotstate" style="background:var(--warn)"></span>Kiro_Opus-48</div>
+              <div class="navi"><span class="dotstate" style="background:var(--ok)"></span>Codex #1</div>
+              <div class="navi"><span class="dotstate" style="background:var(--warn)"></span>AGY_Opus-46</div>
+              <div class="navi"><span class="dotstate" style="background:var(--err)"></span>Gemini Flash</div></div>
+          </div>
+          <div class="card p"><div class="sechead"><h3>Kiro_Opus-48 · trace</h3><span class="tag a">working · 3.1k tok</span></div>
+            <div class="trace">
+<span class="ts">12:03:01</span> <span class="tk">thinking</span> analisando o objetivo e decompondo em 4 subtarefas…<br>
+<span class="ts">12:03:04</span> <span class="tk">tool_call</span> file_read(src/api/topology.py)<br>
+<span class="ts">12:03:07</span> <span class="tk">dispatch</span> → Codex #1 (terminal) AOP-088<br>
+<span class="ts">12:03:09</span> <span class="tw">state</span> working<br>
+<span class="ts">12:03:22</span> <span class="tk">tool_call</span> pane_send(w6:p5, "rodar testes")<br>
+<span class="ts">12:03:48</span> <span class="td">state</span> subtask done · burn 1.2k tok<br>
+<span class="ts">12:04:03</span> <span class="tk">review</span> consenso aprovado (proposer-judge)<br>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEATS -->
+      <section class="screen" id="s-seats">
+        <div class="pagehead"><div><h1 class="h1">Seats</h1><p class="sub">Pool de assinaturas por vendor, com isolamento de credencial.</p></div>
+          <button class="btn primary">+ Registrar Seat</button></div>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="card p"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="background:#16a34a">C</span><b>codex #1</b><span class="tag g" style="margin-left:auto">available</span></div><p class="sub mono">tenant-a · /seats/codex1</p><div style="display:flex;gap:6px;margin-top:10px"><button class="btn ghost" style="border:1px solid var(--border)">Editar</button><button class="btn ghost" style="border:1px solid var(--border)">Remover</button></div></div>
+          <div class="card p"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="background:#7c3aed">A</span><b>opus #1</b><span class="tag a" style="margin-left:auto">leased</span></div><p class="sub mono">por: AOP-088 · AGY</p><div style="display:flex;gap:6px;margin-top:10px"><button class="btn ghost" style="border:1px solid var(--border)">Forçar release</button></div></div>
+          <div class="card p"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="background:#2563eb">G</span><b>gemini #1</b><span class="tag g" style="margin-left:auto">available</span></div><p class="sub mono">tenant-a · /seats/gem1</p><div style="display:flex;gap:6px;margin-top:10px"><button class="btn ghost" style="border:1px solid var(--border)">Editar</button><button class="btn ghost" style="border:1px solid var(--border)">Remover</button></div></div>
+        </div>
+      </section>
+
+      <!-- SESSIONS -->
+      <section class="screen" id="s-sessions">
+        <div class="pagehead"><div><h1 class="h1">Sessions / OAuth</h1><p class="sub">Login dos CLIs por device-flow, por seat, sem sobrescrever sessão.</p></div>
+          <button class="btn primary">+ Nova sessão</button></div>
+        <div class="card"><table><thead><tr><th>Vendor</th><th>Seat</th><th>Status</th><th>Expira</th><th></th></tr></thead><tbody>
+          <tr><td>Codex</td><td class="mono">codex#1</td><td><span class="dotstate" style="background:var(--ok)"></span>connected</td><td>29d</td><td><button class="btn ghost" style="border:1px solid var(--border)">Renovar</button></td></tr>
+          <tr><td>Gemini</td><td class="mono">gemini#1</td><td><span class="dotstate" style="background:var(--warn)"></span>pending… <span class="mono">ABCD-1234</span></td><td>—</td><td><button class="btn ghost" style="border:1px solid var(--border)">Copiar código</button></td></tr>
+          <tr><td>Kiro</td><td class="mono">kiro#1</td><td><span class="dotstate" style="background:var(--err)"></span>expired</td><td>—</td><td><button class="btn primary">Login</button></td></tr>
+        </tbody></table></div>
+      </section>
+
+      <!-- FINOPS -->
+      <section class="screen" id="s-finops">
+        <div class="pagehead"><div><h1 class="h1">FinOps</h1><p class="sub">Custo por token e por seat, atribuído tenant → projeto → agente.</p></div>
+          <div style="display:flex;gap:8px"><div class="tabs"><button class="active">Período: 24h</button><button>7d</button><button>30d</button></div><button class="btn">Exportar CSV</button></div></div>
+        <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="card p kpi"><div class="k">Total</div><div class="v">$42.18</div></div>
+          <div class="card p kpi"><div class="k">Token</div><div class="v">$28.40</div></div>
+          <div class="card p kpi"><div class="k">Seat (util.)</div><div class="v">$13.78</div></div>
+          <div class="card p kpi"><div class="k">Seats ociosos</div><div class="v" style="color:var(--warn)">2</div></div>
+        </div>
+        <div class="card p" style="margin-top:16px"><div class="sechead"><h3>Atribuição por projeto</h3></div>
+          <table><thead><tr><th>Projeto</th><th>Token</th><th>Seat</th><th>Total</th><th>Tendência</th></tr></thead><tbody>
+            <tr><td>Portal Web</td><td>$14.20</td><td>$6.10</td><td><b>$20.30</b></td><td><span class="spark" style="width:120px"><i style="height:50%"></i><i style="height:70%"></i><i style="height:60%"></i><i style="height:90%"></i><i style="height:80%"></i></span></td></tr>
+            <tr><td>Migração API</td><td>$9.80</td><td>$4.40</td><td><b>$14.20</b></td><td><span class="spark" style="width:120px"><i style="height:40%"></i><i style="height:50%"></i><i style="height:45%"></i><i style="height:60%"></i><i style="height:55%"></i></span></td></tr>
+            <tr><td>Refactor Auth</td><td>$4.40</td><td>$3.28</td><td><b>$7.68</b></td><td><span class="spark" style="width:120px"><i style="height:30%"></i><i style="height:20%"></i><i style="height:25%"></i><i style="height:15%"></i><i style="height:10%"></i></span></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <!-- placeholders -->
+      <section class="screen" id="s-agents"><div class="pagehead"><div><h1 class="h1">Agents</h1><p class="sub">Registro único de agentes (fonte de verdade).</p></div><button class="btn primary">+ Registrar agente</button></div><div class="card"><table><thead><tr><th>Label</th><th>Vendor</th><th>Papel</th><th>Estado</th><th>Saúde</th><th>Runtime</th></tr></thead><tbody><tr><td>Kiro_Opus-48</td><td>Kiro</td><td><span class="tag n">orchestrator</span></td><td>working</td><td><span class="tag g">healthy</span></td><td class="mono">w6:p7</td></tr><tr><td>Codex #1</td><td>OpenAI</td><td><span class="tag m">worker</span></td><td>idle</td><td><span class="tag g">healthy</span></td><td class="mono">w6:p5</td></tr></tbody></table></div></section>
+      <section class="screen" id="s-observ"><div class="pagehead"><div><h1 class="h1">Observability</h1><p class="sub">Saúde, alertas e dashboards (Grafana/Prometheus).</p></div></div><div class="grid" style="grid-template-columns:repeat(4,1fr)"><div class="card p kpi"><div class="k">Coupling</div><div class="v" style="font-size:18px;color:var(--ok)">connected</div></div><div class="card p kpi"><div class="k">Postgres</div><div class="v" style="font-size:18px;color:var(--ok)">up</div></div><div class="card p kpi"><div class="k">Redis</div><div class="v" style="font-size:18px;color:var(--ok)">up</div></div><div class="card p kpi"><div class="k">Alertas</div><div class="v" style="color:var(--warn)">1</div></div></div></section>
+      <section class="screen" id="s-skills"><div class="empty"><b>Skills</b><span>Biblioteca de habilidades reutilizáveis — tela em construção.</span></div></section>
+      <section class="screen" id="s-inbox"><div class="empty"><b>Inbox</b><span>Hub de notificações — tela em construção.</span></div></section>
+      <section class="screen" id="s-settings"><div class="pagehead"><div><h1 class="h1">Settings</h1><p class="sub">Configuração do workspace.</p></div></div><div class="card p"><div class="tabs"><button class="active">General</button><button>Members</button><button>Integrations</button><button>API Tokens</button><button>Preferences</button></div><div style="margin-top:18px;color:var(--muted)">Abas de configuração do workspace.</div></div></section>
+
+    </div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('.navi[data-s]').forEach(n=>n.addEventListener('click',()=>{
+  document.querySelectorAll('.navi[data-s]').forEach(x=>x.classList.remove('active'));
+  n.classList.add('active');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+n.dataset.s).classList.add('active');
+  document.querySelector('.content').scrollTop=0;
+}));
+document.querySelectorAll('.tabs').forEach(t=>t.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  t.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');})));
+function toggleTheme(){const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';}
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+groups:
+  # ─── Registry Integrity — Anti-False-Positive ─────────────────────────────
+  # Detecta agentes auto-registrados pelo Herdr que não existem na whitelist canônica.
+  # Whitelist DINÂMICA: derivada do roster vivo do herdr e mantida em
+  #   ~/.config/herdmaster/agent_whitelist.json (reescrita de hora em hora pelo
+  #   reconciliador AOP/ops/agent-registry-reconcile.sh). Não há mais lista fixa.
+  # Qualquer agente fora desta lista = estado falso = alerta imediato + auto-remediation.
+  - name: herdmaster_agent_integrity
+    interval: 5s
+    rules:
+
+      # Alerta 1: Agentes fantasmas detectados
+      # Severidade: warning → auto-remediation automática via webhook
+      - alert: UnlistedAgentsDetected
+        expr: herdmaster_unlisted_agents_total > 0
+        for: 10s
+        labels:
+          severity: warning
+          remediation: auto
+          component: agent_registry
+        annotations:
+          summary: "{{ $value }} agente(s) fantasma(s) no DB HerdMaster"
+          description: |
+            O DB contém {{ $value }} agente(s) não documentado(s) na whitelist canônica.
+            Isso é um falso positivo de estado: o sistema reporta agentes saudáveis que
+            não existem na configuração real do produto, podendo causar falhas de dispatch.
+            Auto-remediation disparada via webhook.
+          runbook_url: "file:///mnt/c/VMs/Projects/Multi_Orchestration_Project_Tasks/HerdMaster/docs/OPS_RUNBOOK.md"
+
+      # Alerta 2: Contagem total diverge do esperado (7)
+      # Severidade: warning → pode ser fantasmas OU agentes removidos indevidamente
+      - alert: AgentCountMismatch
+        expr: herdmaster_agents_total != herdmaster_agents_expected_total
+        for: 30s
+        labels:
+          severity: warning
+          remediation: auto
+          component: agent_registry
+        annotations:
+          summary: "DB tem {{ $value }} agentes, esperado: 7"
+          description: |
+            Contagem de agentes no DB diverge da whitelist canônica.
+            DB atual: {{ $value }} | Esperado: 7
+            Se DB < 7: agente legítimo foi removido indevidamente → investigar.
+            Se DB > 7: agentes fantasmas presentes → auto-remediation disparada.
+
+      # Alerta 3: Whitelist compliance zerada
+      # Severidade: critical → combina com UnlistedAgentsDetected
+      - alert: WhitelistComplianceViolation
+        expr: herdmaster_whitelist_compliant == 0
+        for: 10s
+        labels:
+          severity: critical
+          remediation: auto
+          component: agent_registry
+        annotations:
+          summary: "Registry integrity VIOLADA — agentes não-documentados no DB"
+          description: |
+            herdmaster_whitelist_compliant=0 confirma que o DB contém agentes
+            fora da whitelist canônica. Estado do sistema é FALSO. Pipeline de
+            dispatch pode estar atribuindo tasks a agentes inexistentes.
+
+  # ─── Health Monitoring ────────────────────────────────────────────────────
+  - name: herdmaster_agent_health
+    interval: 10s
+    rules:
+
+      # Agente unhealthy por mais de 2 minutos
+      - alert: AgentUnhealthy
+        expr: herdmaster_agent_health == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: watchdog
+        annotations:
+          summary: "Agente {{ $labels.agent_label }} ({{ $labels.agent_id }}) unhealthy"
+          description: |
+            O watchdog reporta saúde degradada para o agente {{ $labels.agent_label }}.
+            Verificar pane Herdr e reiniciar se necessário.
+
+      # Todos agentes unhealthy (sistema operacionalmente degradado)
+      - alert: AllAgentsUnhealthy
+        expr: herdmaster_agents_healthy == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: watchdog
+        annotations:
+          summary: "TODOS os agentes HerdMaster estão unhealthy"
+          description: "Sistema operacionalmente degradado. Nenhum worker disponível para dispatch."
+
+  # ─── Task Pipeline ────────────────────────────────────────────────────────
+  - name: herdmaster_task_pipeline
+    interval: 15s
+    rules:
+
+      # Tasks falhando por mais de 5 min
+      - alert: TaskFailureRateHigh
+        expr: herdmaster_tasks_total{state="failed"} > 3
+        for: 5m
+        labels:
+          severity: warning
+          component: dispatch
+        annotations:
+          summary: "{{ $value }} tasks em estado failed no HerdMaster"
+          description: |
+            Muitas tasks falharam. Provável causa: agentes fantasmas (ver UnlistedAgentsDetected)
+            ou panes Herdr com problemas. Verificar OPS_RUNBOOK.md §6.
+
+      # HerdMaster offline (endpoint não responde)
+      - alert: HerdMasterDown
+        expr: up{job="herdmaster-internal-metrics"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: control_plane
+        annotations:
+          summary: "HerdMaster Control Plane está DOWN"
+          description: "O endpoint /metrics não responde. Executar: hm-start"
+
+  # ─── AOP Control Plane — FinOps + Tracing ────────────────────────────────
+  - name: aop_control_plane_observability
+    interval: 15s
+    rules:
+
+      - alert: AOPControlPlaneMetricsDown
+        expr: up{job="aop-control-plane-metrics"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: aop_control_plane
+        annotations:
+          summary: "AOP Control Plane /metrics está DOWN"
+          description: "Prometheus não consegue coletar http://localhost:8090/metrics."
+
+      - alert: AOPControlPlaneLivenessMissing
+        expr: absent(aop_control_plane_up{job="aop-control-plane-metrics"})
+        for: 1m
+        labels:
+          severity: warning
+          component: aop_control_plane
+        annotations:
+          summary: "Métrica aop_control_plane_up ausente"
+          description: "O scrape responde, mas a métrica de liveness do AOP não está presente."
+
+      - alert: AOPFinOpsMetricsMissing
+        expr: absent(aop_finops_project_cost_usd{job="aop-control-plane-metrics"})
+        for: 2m
+        labels:
+          severity: warning
+          component: finops
+        annotations:
+          summary: "Métricas FinOps do AOP ausentes"
+          description: "aop_finops_project_cost_usd não foi exposta pelo control-plane em :8090/metrics."
+
+      - alert: AOPTraceTokenBurnSpike
+        expr: sum(increase(aop_trace_token_burn_total{job="aop-control-plane-metrics"}[15m])) > 10000
+        for: 5m
+        labels:
+          severity: warning
+          component: tracing
+        annotations:
+          summary: "Token burn alto no AOP tracing"
+          description: "O tracing registrou mais de 10000 tokens nos últimos 15 minutos."

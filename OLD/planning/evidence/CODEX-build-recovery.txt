@@ -1,0 +1,16 @@
+2026-06-26T12:30:45Z CODEX build/runtime recovery
+
+Change:
+- AOP/web/src/app/layout.tsx removed next/font/google imports so production builds no longer require Google Fonts network fetches.
+
+Verification:
+- npm run build in AOP/web: compiled successfully, TypeScript finished, 13/13 static pages generated, routes include /, /finops, /inbox, /live, /my-issues, /observability, /projects, /seats, /sessions, /settings, /squad-builder.
+- AOP/ops/stop.sh then AOP/ops/start.sh: Postgres up, Redis up, Prometheus 200, Grafana 200, Alertmanager 200, Blackbox 200, Remediation Webhook 200, HerdMaster 200, AOP API 200, AOP Frontend 200.
+- curl http://127.0.0.1:8090/health: {"status":"ok","coupling":{"status":"connected","last_error":null,"message_bus_status":"connected","message_bus_error":null}}
+- curl http://127.0.0.1:8090/seats: {"seats":[]}
+- curl http://127.0.0.1:13000/seats: HTTP 200
+
+Notes:
+- Initial sandboxed npm build failed because Turbopack could not bind a worker process; escalated build passed.
+- Focused pytest with FastAPI TestClient hung in Starlette TestClient.__enter__ in this venv; direct live endpoint smoke passed after restarting the stale API process with closed psycopg connections.
+- layout.tsx SHA256: 4edc553ea14cafbc4fcdcafc5dc4d6539e6c7b98c43ff56facb70dfb720c88e9

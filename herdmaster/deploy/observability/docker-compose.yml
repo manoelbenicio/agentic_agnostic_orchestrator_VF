@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+
+  # ── Prometheus ─────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: herdmaster-prometheus
+    network_mode: "host"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      # Runtime-generated HerdMaster API token (container-readable copy written by AOP/ops).
+      - ${AOP_OPS_RUNTIME_DIR:-/tmp/aop-ops-runtime}/prometheus.token:/etc/prometheus/herdmaster.token:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.enable-lifecycle'        # permite reload sem restart: POST /-/reload
+    restart: unless-stopped
+
+  # ── Grafana ────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: herdmaster-grafana
+    network_mode: "host"
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_UNIFIED_ALERTING_ENABLED=true
+      - GF_ALERTING_ENABLED=false        # desabilita alerting legado (usa unified)
+    restart: unless-stopped
+
+  # ── Blackbox Exporter ──────────────────────────────────────────────────────
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    container_name: herdmaster-blackbox
+    network_mode: "host"
+    volumes:
+      - ./blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    command: --config.file=/etc/blackbox_exporter/config.yml
+    restart: unless-stopped
+
+  # ── Alertmanager ──────────────────────────────────────────────────────────
+  # Roteia alertas para os receivers: auto-remediation webhook, log, critical
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: herdmaster-alertmanager
+    network_mode: "host"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.listen-address=:9093'
+    restart: unless-stopped
+
+  # ── Remediation Webhook Server ─────────────────────────────────────────────
+  # Servidor Python leve que recebe alertas do Alertmanager e executa purge
+  # automático de agentes não documentados via HerdMaster HTTP API (sem acesso direto ao DB)
+  remediation-webhook:
+    image: python:3.12-slim
+    container_name: herdmaster-remediation
+    network_mode: "host"
+    volumes:
+      - ./remediation:/app:ro
+      - /home/dataops-lab/.config/herdmaster:/herdmaster-data:rw
+    environment:
+      - WEBHOOK_PORT=9099
+      - HERDMASTER_API=http://127.0.0.1:8080
+      - HERDMASTER_TOKEN=admin
+      - REMEDIATION_LOG=/herdmaster-data/remediation.log
+      - AGENT_WHITELIST_FILE=/herdmaster-data/agent_whitelist.json
+      - HERDMASTER_TOKEN_FILE=/herdmaster-data/herdmaster.token
+    command: python /app/webhook_server.py
+    restart: unless-stopped
+    depends_on:
+      - alertmanager

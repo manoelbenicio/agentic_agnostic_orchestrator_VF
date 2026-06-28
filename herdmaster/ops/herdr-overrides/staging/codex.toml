@@ -1,0 +1,105 @@
+# LOCAL OVERRIDE for Herdr agent detection — agent "codex" (OpenAI Codex CLI)
+# Installed to: ~/.config/herdr/agent-detection/codex.toml
+# REPLACE semantics: fully replaces the bundled/remote codex manifest, so it MUST
+# contain the complete existing ruleset PLUS our addition.
+#
+# Base: remote codex.toml version 2026.06.10.3 (captured 2026-06-26 verbatim).
+# Addition: rule `live_idle` (state=idle, whole_recent) — the existing idle rule
+#   `osc_title_idle` keys ONLY on the OSC title region. We observed live (2026-06-26)
+#   that codex panes frequently have an EMPTY OSC title (both at startup AND
+#   in-session, e.g. w8:pR), so osc_title_idle does not match and the pane falls back
+#   to default_known_agent_idle_fallback. `live_idle` adds a whole_recent fallback
+#   keyed on the persistent model·cwd footer line, at LOW priority so every existing
+#   working/blocked/transcript rule still wins.
+# version MUST be dotted-numeric (Herdr rejects suffixes); .99 marks the local fork.
+id = "codex"
+version = "2026.06.10.99"
+min_engine_version = 2
+updated_at = "2026-06-26T00:00:00Z"
+
+# ── EXISTING RULES (verbatim from remote 2026.06.10.3) ──────────────────────────
+[[rules]]
+id = "osc_title_blocked"
+state = "blocked"
+priority = 1100
+region = "osc_title"
+visible_blocker = true
+contains = ["Action Required"]
+
+[[rules]]
+id = "osc_title_working"
+state = "working"
+priority = 1050
+region = "osc_title"
+visible_working = true
+regex = ['^[\x{2800}-\x{28FF}] ']
+
+[[rules]]
+id = "transcript_viewer"
+state = "unknown"
+priority = 1000
+region = "after_last_prompt_marker"
+skip_state_update = true
+contains = ["↑/↓ to scroll", "pgup/pgdn to", "home/end to jump", "q to quit"]
+any = [
+  { contains = ["esc to edit prev"] },
+  { contains = ["esc/← to edit prev"] },
+]
+
+[[rules]]
+id = "live_strong_blocker"
+state = "blocked"
+priority = 900
+region = "after_last_prompt_marker"
+visible_blocker = true
+any = [
+  { contains = ["press enter to confirm or esc to cancel"] },
+  { contains = ["enter to submit answer"] },
+  { contains = ["enter to submit all"] },
+  { contains = ["allow command?"] },
+]
+
+[[rules]]
+id = "weak_blocker"
+state = "blocked"
+priority = 600
+region = "whole_recent"
+any = [
+  { contains = ["[y/n]"] },
+  { contains = ["yes (y)"] },
+  { contains = ["do you want to"], any = [{ contains = ["yes"] }, { contains = ["❯"] }] },
+  { contains = ["would you like to"], any = [{ contains = ["yes"] }, { contains = ["❯"] }] },
+]
+
+[[rules]]
+id = "osc_title_idle"
+state = "idle"
+priority = 100
+region = "osc_title"
+visible_idle = true
+regex = ['\S']
+not = [
+  { regex = ['^[\x{2800}-\x{28FF}]'] },
+  { contains = ["Action Required"] },
+]
+
+# ── LOCAL ADDITION: whole_recent idle fallback (empty-OSC-title case) ───────────
+# Signature captured live 2026-06-26 (w8:pQ startup + w8:pR in-session): the
+# persistent footer "gpt-<ver> <effort> · /<cwd>" is present whenever codex is at a
+# ready prompt. Priority 50 < every existing rule, and `not` guards exclude the
+# blocker/working markers as belt-and-suspenders.
+[[rules]]
+id = "live_idle"
+state = "idle"
+priority = 50
+region = "whole_recent"
+visible_idle = true
+line_regex = ['gpt-[0-9.]+\s+\w+\s+·\s+/']
+not = [
+  { contains = ["Action Required"] },
+  { contains = ["press enter to confirm or esc to cancel"] },
+  { contains = ["enter to submit answer"] },
+  { contains = ["allow command?"] },
+  { contains = ["[y/n]"] },
+  { regex = ['^[\x{2800}-\x{28FF}] '] },
+]

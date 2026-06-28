@@ -1,0 +1,44 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /mnt/c/VMs/Projects/Multi_Orchestration_Project_Tasks
+plugins: asyncio-1.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 34 items
+
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestHealthAPI::test_health PASSED       [  2%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestHealthAPI::test_health_ready PASSED [  5%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestProjectsAPI::test_get_projects PASSED [  8%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestProjectsAPI::test_create_and_list_project PASSED [ 11%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestIssuesAPI::test_get_issues PASSED   [ 14%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestIssuesAPI::test_get_my_issues PASSED [ 17%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestSeatsAPI::test_get_seats PASSED     [ 20%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestSeatsAPI::test_create_seat PASSED   [ 23%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestSessionsAPI::test_device_login PASSED [ 26%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestInboxAPI::test_get_inbox PASSED     [ 29%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestInboxAPI::test_post_inbox PASSED    [ 32%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestInboxAPI::test_unread_count PASSED  [ 35%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestSettingsAPI::test_get_settings PASSED [ 38%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestSettingsAPI::test_patch_settings PASSED [ 41%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestSettingsAPI::test_create_api_token PASSED [ 44%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestAgentsAPI::test_get_agents PASSED   [ 47%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestAgentsAPI::test_create_agent PASSED [ 50%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestSquadsAPI::test_post_and_get_topology PASSED [ 52%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFinOpsAPI::test_finops_rollup PASSED [ 55%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestTracingAPI::test_post_tracing_event PASSED [ 58%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestMetricsAPI::test_get_metrics PASSED [ 61%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/] PASSED  [ 64%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/projects] PASSED [ 67%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/issues] PASSED [ 70%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/seats] PASSED [ 73%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/sessions] PASSED [ 76%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/finops] PASSED [ 79%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/observability] PASSED [ 82%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/live] PASSED [ 85%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/squad-builder] PASSED [ 88%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/agents] PASSED [ 91%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/inbox] PASSED [ 94%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/my-issues] PASSED [ 97%]
+AOP/e2e/test_smoke_e2e_f1_f6.py::TestFrontendUI::test_ui_page[/settings] PASSED [100%]
+
+============================== 34 passed in 2.25s ==============================

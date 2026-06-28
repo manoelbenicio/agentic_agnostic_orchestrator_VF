@@ -1,0 +1,51 @@
+=== HerdMaster FK Fix Evidence ===
+2026-06-26T11:49:46Z
+
+=== process ===
+ 271767       00:50 /home/dataops-lab/.local/share/pipx/venvs/herdmaster/bin/python /home/dataops-lab/.local/bin/herdmaster start --http
+
+=== herdmaster agents ===
+                                     Agents                                     
+┏━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━┓
+┃       ┃         ┃         ┃         ┃         ┃         ┃ Current  ┃         ┃
+┃ ID    ┃ Label   ┃ Type    ┃ Role    ┃ State   ┃ Health  ┃ Task     ┃ Heartb… ┃
+┡━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━┩
+│ cli   │ CLI     │ system  │ observ… │ idle    │ healthy │          │         │
+│       │ Operat… │         │         │         │         │          │         │
+│ w8:pF │ agy     │ agy     │ worker  │ idle    │ healthy │          │ 2026-0… │
+│ w8:pG │ codex   │ codex   │ worker  │ working │ suspect │          │ 2026-0… │
+│ w8:pH │ codex   │ codex   │ worker  │ working │ suspect │          │ 2026-0… │
+│ w8:pJ │ kiro    │ kiro    │ orches… │ working │ healthy │          │ 2026-0… │
+│ w8:pK │ codex   │ codex   │ worker  │ working │ suspect │          │ 2026-0… │
+│ w8:pM │ codex   │ codex   │ worker  │ idle    │ healthy │          │ 2026-0… │
+│ w8:pN │ agy     │ agy     │ worker  │ idle    │ healthy │          │ 2026-0… │
+│ w8:pQ │ openco… │ openco… │ worker  │ idle    │ healthy │          │ 2026-0… │
+└───────┴─────────┴─────────┴─────────┴─────────┴─────────┴──────────┴─────────┘
+
+=== herdmaster tasks list ===
+                             Tasks                              
+┏━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┓
+┃ ID ┃ Title ┃ State ┃ Priority ┃ Assigned ┃ Project ┃ Updated ┃
+┡━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━┩
+└────┴───────┴───────┴──────────┴──────────┴─────────┴─────────┘
+
+=== postgres constraints / schemas / role / churn ===
+schemas:
+  hm_main
+agent_fk_rules:
+  hm_main.health_events.agent_id health_events_agent_id_fkey CASCADE
+  hm_main.messages.from_agent messages_from_agent_fkey SET NULL
+  hm_main.task_audit_log.agent_id task_audit_log_agent_id_fkey SET NULL
+  hm_main.tasks.assigned_to tasks_assigned_to_fkey SET NULL
+  hm_main.tasks.completed_by tasks_completed_by_fkey SET NULL
+  hm_main.tasks.created_by tasks_created_by_fkey SET NULL
+w8:pJ role=orchestrator
+churn_probe before=1 after=0 status=ok
+
+=== post-fix hm.log check ===
+hm.log not recreated after rotation; no post-fix InFailedSqlTransaction entries present.
+
+=== tests ===
+bash -n HerdMaster/ops/bootstrap.sh: PASS
+python -m py_compile schema.py watchdog/engine.py cli.py: PASS
+HerdMaster pytest: 228 passed, 6 skipped in 36.58s
