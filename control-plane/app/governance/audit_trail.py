@@ -1,4 +1,4 @@
-"""Immutable, tamper-evident audit trail.
+"""Immutable, tamper-evident audit trail with query and export APIs.
 
 Provides :class:`AuditTrail`, an append-only log of :class:`AuditEntry`
 records. Each entry's ``entry_hash`` is a SHA-256 digest over a canonical
@@ -6,10 +6,19 @@ serialization of the entry plus the previous entry's hash, forming a hash
 chain. :meth:`AuditTrail.verify_integrity` walks the chain and reports
 any tampered, missing, or out-of-order entries.
 
+Primary API:
+  * :meth:`AuditTrail.log_event`      - record a new audit entry
+  * :meth:`AuditTrail.query_logs`     - filter entries by actor / action /
+                                        resource / date range / correlation
+  * :meth:`AuditTrail.export_audit_report` - serialize entries as JSON or CSV
+  * :meth:`AuditTrail.verify_integrity`    - walk the hash chain
+
 Storage is pluggable via the :class:`AuditStorage` protocol; the default
-in-memory backend is process-local and useful for tests, development, or
-single-instance deployments. A Postgres-backed backend can be wired in by
-implementing the protocol against the existing ``audit_events`` table.
+in-memory backend is process-local. A Postgres-backed backend can be
+implemented against the existing ``audit_events`` table.
+
+A FastAPI router exposing ``/governance/audit`` is built by
+:func:`build_governance_audit_router`.
 """
 
 from __future__ import annotations
@@ -22,13 +31,17 @@ import logging
 import threading
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import Any, Iterable, Iterator, Protocol, runtime_checkable
+from typing import Any, Iterable, Iterator, Literal, Protocol, runtime_checkable
 from uuid import uuid4
+
+from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger(__name__)
 
 _GENESIS_HASH = "0" * 64
 _HASH_ALGORITHM = "sha256"
+
+ExportFormat = Literal["json", "csv"]
 
 
 def _utcnow() -> datetime:
@@ -85,7 +98,7 @@ class AuditEntry:
 
 @dataclass(frozen=True, slots=True)
 class AuditQuery:
-    """Filter parameters for :meth:`AuditTrail.query`."""
+    """Filter parameters for :meth:`AuditTrail.query_logs`."""
 
     actor: str | None = None
     action: str | None = None
@@ -174,8 +187,8 @@ class AuditTrail:
         self._lock = threading.Lock()
         self._last_hash = self._bootstrap_last_hash()
 
-    # ------------------------------------------------------------------ append
-    def append(
+    # --------------------------------------------------------- log_event
+    def log_event(
         self,
         actor: str,
         action: str,
@@ -190,8 +203,10 @@ class AuditTrail:
     ) -> AuditEntry:
         """Record a new audit entry and return it.
 
-        The entry's ``prev_hash`` and ``entry_hash`` are computed by this
-        method; callers must not supply them.
+        ``actor``, ``action``, and ``resource`` are required; everything
+        else is optional context. The entry's ``prev_hash`` and
+        ``entry_hash`` are computed by this method; callers must not
+        supply them.
         """
         with self._lock:
             prev_hash = self._last_hash
@@ -228,9 +243,57 @@ class AuditTrail:
             self._last_hash = entry_hash
             return entry
 
-    # ------------------------------------------------------------------- query
+    # Alias for backward compatibility with earlier code paths.
+    def append(self, *args: Any, **kwargs: Any) -> AuditEntry:
+        return self.log_event(*args, **kwargs)
+
+    # --------------------------------------------------------- query_logs
+    def query_logs(
+        self,
+        actor: str | None = None,
+        action: str | None = None,
+        resource_prefix: str | None = None,
+        start: datetime | str | None = None,
+        end: datetime | str | None = None,
+        correlation_id: str | None = None,
+        limit: int | None = None,
+    ) -> list[AuditEntry]:
+        """Return entries matching the supplied filters.
+
+        ``start`` / ``end`` accept either :class:`datetime` objects or
+        ISO-8601 strings (the latter are coerced to UTC). ``limit``
+        truncates the result to the first N entries after filtering.
+        """
+        start_dt = _coerce_dt(start)
+        end_dt = _coerce_dt(end)
+        q = AuditQuery(
+            actor=actor,
+            action=action,
+            resource_prefix=resource_prefix,
+            start=start_dt,
+            end=end_dt,
+            correlation_id=correlation_id,
+            limit=limit,
+        )
+        return self._query(q)
+
+    # Aliases preserved from earlier API surface.
     def query(self, q: AuditQuery | None = None) -> list[AuditEntry]:
-        """Return entries matching ``q`` (or all entries if ``q`` is ``None``)."""
+        return self._query(q)
+
+    def query_in_range(
+        self,
+        start: datetime | None = None,
+        end: datetime | None = None,
+        actor: str | None = None,
+        action: str | None = None,
+        limit: int | None = None,
+    ) -> list[AuditEntry]:
+        return self._query(
+            AuditQuery(start=start, end=end, actor=actor, action=action, limit=limit)
+        )
+
+    def _query(self, q: AuditQuery | None) -> list[AuditEntry]:
         q = q or AuditQuery()
         results: list[AuditEntry] = []
         for entry in self._storage.iter_all():
@@ -241,49 +304,33 @@ class AuditTrail:
                 break
         return results
 
-    def query_in_range(
+    # ------------------------------------------------ export_audit_report
+    def export_audit_report(
         self,
-        start: datetime | None = None,
-        end: datetime | None = None,
-        actor: str | None = None,
-        action: str | None = None,
-        limit: int | None = None,
-    ) -> list[AuditEntry]:
-        return self.query(
-            AuditQuery(start=start, end=end, actor=actor, action=action, limit=limit)
-        )
+        format: ExportFormat = "json",
+        q: AuditQuery | None = None,
+        **filters: Any,
+    ) -> str:
+        """Return a JSON or CSV serialization of the matching audit entries.
 
-    # ------------------------------------------------------------------ export
+        If ``q`` is provided, only entries matching it are exported.
+        Otherwise ``filters`` are forwarded to :meth:`query_logs`. JSON
+        is the default; CSV is suitable for spreadsheet ingestion.
+        """
+        if q is not None:
+            entries = self._query(q)
+        else:
+            entries = self.query_logs(**filters)
+        if format == "csv":
+            return self._to_csv(entries)
+        return self._to_json(entries)
+
+    # Backward-compatible export aliases.
     def export_json(self, q: AuditQuery | None = None) -> str:
-        entries = [entry.to_dict() for entry in self.query(q)]
-        return json.dumps(entries, indent=2, sort_keys=True, default=str)
+        return self.export_audit_report(format="json", q=q)
 
     def export_csv(self, q: AuditQuery | None = None) -> str:
-        entries = self.query(q)
-        buffer = io.StringIO()
-        fieldnames = [
-            "entry_id",
-            "timestamp",
-            "actor",
-            "action",
-            "resource",
-            "ip",
-            "correlation_id",
-            "prev_hash",
-            "entry_hash",
-            "old_value",
-            "new_value",
-            "metadata",
-        ]
-        writer = csv.DictWriter(buffer, fieldnames=fieldnames)
-        writer.writeheader()
-        for entry in entries:
-            row = entry.to_dict()
-            row["old_value"] = _stringify(row.get("old_value"))
-            row["new_value"] = _stringify(row.get("new_value"))
-            row["metadata"] = json.dumps(row.get("metadata") or {}, sort_keys=True, default=str)
-            writer.writerow({key: row.get(key, "") for key in fieldnames})
-        return buffer.getvalue()
+        return self.export_audit_report(format="csv", q=q)
 
     # ----------------------------------------------------------- integrity
     def verify_integrity(self) -> IntegrityReport:
@@ -345,6 +392,59 @@ class AuditTrail:
             last = entry.entry_hash or last
         return last
 
+    # ----------------------------------------------------------------- helpers
+    @staticmethod
+    def _to_json(entries: Iterable[AuditEntry]) -> str:
+        return json.dumps(
+            [entry.to_dict() for entry in entries],
+            indent=2,
+            sort_keys=True,
+            default=str,
+        )
+
+    @staticmethod
+    def _to_csv(entries: Iterable[AuditEntry]) -> str:
+        buffer = io.StringIO()
+        fieldnames = [
+            "entry_id",
+            "timestamp",
+            "actor",
+            "action",
+            "resource",
+            "ip",
+            "correlation_id",
+            "prev_hash",
+            "entry_hash",
+            "old_value",
+            "new_value",
+            "metadata",
+        ]
+        writer = csv.DictWriter(buffer, fieldnames=fieldnames)
+        writer.writeheader()
+        for entry in entries:
+            row = entry.to_dict()
+            row["old_value"] = _stringify(row.get("old_value"))
+            row["new_value"] = _stringify(row.get("new_value"))
+            row["metadata"] = json.dumps(row.get("metadata") or {}, sort_keys=True, default=str)
+            writer.writerow({key: row.get(key, "") for key in fieldnames})
+        return buffer.getvalue()
+
+
+def _coerce_dt(value: datetime | str | None) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+    if isinstance(value, str):
+        if not value:
+            return None
+        try:
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+    return None
+
 
 def _stringify(value: Any) -> str:
     if value is None:
@@ -372,17 +472,146 @@ def get_default_trail() -> AuditTrail:
         return _DEFAULT_TRAIL
 
 
+# ---------------------------------------------------------------------------
+# FastAPI router (/governance/audit)
+# ---------------------------------------------------------------------------
+
+
+def _parse_iso_optional(value: str | None, field_name: str) -> datetime | None:
+    if value is None or value == "":
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "invalid_timestamp", "field": field_name, "reason": str(exc)},
+        ) from exc
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def build_governance_audit_router(trail: AuditTrail | None = None) -> APIRouter:
+    """Build a router exposing ``/governance/audit`` endpoints.
+
+    Endpoints:
+      * ``POST /governance/audit/log``        - record an audit event
+      * ``GET  /governance/audit/logs``       - query with filters
+      * ``GET  /governance/audit/export``     - export as JSON or CSV
+      * ``GET  /governance/audit/integrity``  - verify hash chain
+      * ``GET  /governance/audit/count``      - total entry count
+    """
+    router = APIRouter(prefix="/governance/audit")
+    state: dict[str, AuditTrail] = {"trail": trail if trail is not None else AuditTrail()}
+
+    def _trail() -> AuditTrail:
+        return state["trail"]
+
+    @router.post("/log")
+    def log_event(payload: dict[str, Any]) -> dict[str, Any]:
+        actor = payload.get("actor")
+        action = payload.get("action")
+        resource = payload.get("resource")
+        if not isinstance(actor, str) or not actor:
+            raise HTTPException(400, detail={"code": "missing_actor"})
+        if not isinstance(action, str) or not action:
+            raise HTTPException(400, detail={"code": "missing_action"})
+        if not isinstance(resource, str) or not resource:
+            raise HTTPException(400, detail={"code": "missing_resource"})
+        entry = _trail().log_event(
+            actor=actor,
+            action=action,
+            resource=resource,
+            old_value=payload.get("old_value"),
+            new_value=payload.get("new_value"),
+            ip=payload.get("ip"),
+            correlation_id=payload.get("correlation_id"),
+            metadata=payload.get("metadata") or {},
+            timestamp=_parse_iso_optional(payload.get("timestamp"), "timestamp"),
+        )
+        return entry.to_dict()
+
+    @router.get("/logs")
+    def query_logs(
+        actor: str | None = Query(None),
+        action: str | None = Query(None),
+        resource_prefix: str | None = Query(None),
+        start: str | None = Query(None),
+        end: str | None = Query(None),
+        correlation_id: str | None = Query(None),
+        limit: int | None = Query(None, ge=1, le=10_000),
+    ) -> dict[str, Any]:
+        entries = _trail().query_logs(
+            actor=actor,
+            action=action,
+            resource_prefix=resource_prefix,
+            start=_parse_iso_optional(start, "start"),
+            end=_parse_iso_optional(end, "end"),
+            correlation_id=correlation_id,
+            limit=limit,
+        )
+        return {
+            "count": len(entries),
+            "entries": [entry.to_dict() for entry in entries],
+        }
+
+    @router.get("/export")
+    def export(
+        format: ExportFormat = Query("json"),
+        actor: str | None = Query(None),
+        action: str | None = Query(None),
+        resource_prefix: str | None = Query(None),
+        start: str | None = Query(None),
+        end: str | None = Query(None),
+        correlation_id: str | None = Query(None),
+        limit: int | None = Query(None, ge=1, le=10_000),
+    ) -> Any:
+        text = _trail().export_audit_report(
+            format=format,
+            actor=actor,
+            action=action,
+            resource_prefix=resource_prefix,
+            start=_parse_iso_optional(start, "start"),
+            end=_parse_iso_optional(end, "end"),
+            correlation_id=correlation_id,
+            limit=limit,
+        )
+        media_type = "text/csv" if format == "csv" else "application/json"
+        from fastapi import Response
+
+        return Response(content=text, media_type=media_type)
+
+    @router.get("/integrity")
+    def integrity() -> dict[str, Any]:
+        report = _trail().verify_integrity()
+        return {
+            "is_valid": report.is_valid,
+            "total_entries": report.total_entries,
+            "verified_entries": report.verified_entries,
+            "broken_links": list(report.broken_links),
+            "mismatched_hashes": list(report.mismatched_hashes),
+            "message": report.message,
+        }
+
+    @router.get("/count")
+    def count() -> dict[str, int]:
+        return {"count": len(_trail())}
+
+    return router
+
+
 __all__ = [
     "AuditEntry",
     "AuditQuery",
     "AuditStorage",
     "AuditTrail",
+    "ExportFormat",
     "InMemoryAuditStorage",
     "IntegrityReport",
+    "build_governance_audit_router",
     "get_default_trail",
 ]
 
 
-# Re-export timedelta/utcnow markers so the module's typecheck-time imports
-# remain stable if other governance modules re-export them.
 _ = (timedelta, _utcnow)
