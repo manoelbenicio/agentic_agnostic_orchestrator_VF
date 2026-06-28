@@ -1,0 +1,163 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - aop_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - aop_net
+
+  redis:
+    image: redis/redis-stack-server:latest
+    restart: unless-stopped
+    environment:
+      REDIS_ARGS: "--requirepass ${REDIS_PASSWORD}"
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD-SHELL", 'redis-cli -a "$${REDIS_PASSWORD}" ping | grep PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - aop_net
+
+  registry:
+    image: registry:2
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5000:5000"
+    networks:
+      - aop_net
+
+  control-plane:
+    profiles: ["prod"]
+    image: ${AOP_CONTROL_PLANE_IMAGE:-aop/control-plane:local}
+    build:
+      context: ../control-plane
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      HERDMASTER_URL: ${HERDMASTER_URL:-http://host.docker.internal:8080}
+      HERDMASTER_TOKEN: ${HERDMASTER_TOKEN:-}
+    ports:
+      - "127.0.0.1:${AOP_API_PORT:-8090}:8090"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=3).read()\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - aop_net
+
+  web:
+    profiles: ["prod"]
+    image: ${AOP_WEB_IMAGE:-aop/web:local}
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://127.0.0.1:${AOP_API_PORT:-8090}}
+    ports:
+      - "127.0.0.1:${AOP_WEB_PORT:-13000}:13000"
+    depends_on:
+      control-plane:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:13000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - aop_net
+
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - NGINX_PORT=${NGINX_PORT:-8000}
+      - AOP_API_PORT=${AOP_API_PORT:-8090}
+      - AOP_WEB_PORT=${AOP_WEB_PORT:-13000}
+      - AOP_DOMAIN=${AOP_DOMAIN:-localhost}
+      - AOP_ADDITIONAL_DOMAINS=${AOP_ADDITIONAL_DOMAINS:-}
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates
+
+  nginx-tls:
+    profiles: ["tls"]
+    image: nginx:latest
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - NGINX_PORT=${NGINX_PORT:-8000}
+      - NGINX_SSL_PORT=${NGINX_SSL_PORT:-8443}
+      - AOP_API_PORT=${AOP_API_PORT:-8090}
+      - AOP_WEB_PORT=${AOP_WEB_PORT:-13000}
+      - AOP_DOMAIN=${AOP_DOMAIN:-localhost}
+      - AOP_ADDITIONAL_DOMAINS=${AOP_ADDITIONAL_DOMAINS:-}
+      - NGINX_CERT_FILE=${NGINX_CERT_FILE:-/etc/nginx/certs/aop.crt}
+      - NGINX_CERT_KEY_FILE=${NGINX_CERT_KEY_FILE:-/etc/nginx/certs/aop.key}
+    volumes:
+      - ./nginx/tls-templates:/etc/nginx/templates:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    restart: unless-stopped
+    environment:
+      - CLUSTER_NAME=aop_cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    ports:
+      - "127.0.0.1:9870:9870"
+      - "127.0.0.1:8020:8020"
+    volumes:
+      - aop_hdfs_namenode:/hadoop/dfs/name
+    networks:
+      - aop_net
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    restart: unless-stopped
+    environment:
+      - CLUSTER_NAME=aop_cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    volumes:
+      - aop_hdfs_datanode:/hadoop/dfs/data
+    networks:
+      - aop_net
+    depends_on:
+      - namenode
+
+networks:
+  aop_net:
+    driver: bridge
+
+volumes:
+  aop_postgres_data:
+  aop_hdfs_namenode:
+  aop_hdfs_datanode:

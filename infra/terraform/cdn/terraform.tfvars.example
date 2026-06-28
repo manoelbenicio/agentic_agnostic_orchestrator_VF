@@ -1,0 +1,13 @@
+aws_region          = "us-east-1"
+project             = "aop"
+environment         = "prod"
+origin_domain_name  = "aop-origin.example.com"
+origin_protocol_policy = "https-only"
+
+# Optional custom DNS/SSL. Certificate must be in us-east-1 for CloudFront.
+aliases             = ["app.example.com"]
+acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/00000000-0000-0000-0000-000000000000"
+
+# Optional WAF and static asset bucket.
+web_acl_id          = ""
+static_bucket_name  = ""

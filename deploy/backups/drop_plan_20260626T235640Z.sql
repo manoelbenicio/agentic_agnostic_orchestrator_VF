@@ -1,0 +1,23 @@
+-- AOP orphan-schema cleanup. Backup: full/aop_full_20260626T235150Z.dump (verified, contains all 33 schemas)
+DROP SCHEMA IF EXISTS "ag2_finops_evidence" CASCADE;
+DROP SCHEMA IF EXISTS "ag2_projects_evidence" CASCADE;
+DROP SCHEMA IF EXISTS "ag2_registry_evidence" CASCADE;
+DROP SCHEMA IF EXISTS "ag2_seats_evidence" CASCADE;
+DROP SCHEMA IF EXISTS "ag2_sessions_evidence" CASCADE;
+DROP SCHEMA IF EXISTS "ag2_tracing_evidence" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_ev3_finops" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_ev3_issues" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_ev3_projects" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_ev3_registry" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_ev3_tracing" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_evidence_finops" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_evidence_issues" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_evidence_projects" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_evidence_registry" CASCADE;
+DROP SCHEMA IF EXISTS "ag3_evidence_tracing" CASCADE;
+DROP SCHEMA IF EXISTS "ag4_curl_finops" CASCADE;
+DROP SCHEMA IF EXISTS "ag4_curl_projects" CASCADE;
+DROP SCHEMA IF EXISTS "ag4_curl_registry" CASCADE;
+DROP SCHEMA IF EXISTS "ag4_curl_seats" CASCADE;
+DROP SCHEMA IF EXISTS "ag4_curl_sessions" CASCADE;
+DROP SCHEMA IF EXISTS "ag4_curl_tracing" CASCADE;

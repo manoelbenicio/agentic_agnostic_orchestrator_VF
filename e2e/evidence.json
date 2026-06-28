@@ -1,0 +1,38 @@
+{
+  "base_url": "http://127.0.0.1:8090",
+  "checks": {
+    "health": "passed",
+    "metrics": "passed",
+    "ready": "passed"
+  },
+  "error": "POST /agents failed with HTTP 503: {\"detail\":{\"code\":\"registry_propagation_unavailable\",\"reason\":\"acl propagation target unavailable\"}}",
+  "gaps": [],
+  "generated_at": "2026-06-27T22:25:25.294095+00:00",
+  "responses": {
+    "health": {
+      "coupling": {
+        "last_error": null,
+        "message_bus_error": null,
+        "message_bus_status": "connected",
+        "status": "connected"
+      },
+      "status": "ok"
+    },
+    "metrics_excerpt": "# HELP aop_control_plane_up Control plane liveness\n# TYPE aop_control_plane_up gauge\naop_control_plane_up 1\n# HELP aop_finops_project_cost_usd Project cost by engine\n# TYPE aop_finops_project_cost_usd gauge\n# HELP aop_finops_project_cost_records Cost record count\n# TYPE aop_finops_project_cost_records gauge\n# HELP aop_finops_model_cost_usd Project cost broken down by model\n# TYPE aop_finops_model_cost_usd gauge\n\n# HELP aop_trace_token_burn_total Token burn by agent and runtime\n# TYPE aop_trace_token_burn_total counter\n# HELP aop_trace_seat_seconds_total Seat seconds by agent and runtime\n# TYPE aop_trace_seat_seconds_total counter\n",
+    "ready": {
+      "checks": {
+        "postgres": true,
+        "redis": true
+      },
+      "coupling": {
+        "last_error": null,
+        "message_bus_error": null,
+        "message_bus_status": "connected",
+        "status": "connected"
+      },
+      "status": "ready"
+    }
+  },
+  "result": "failed",
+  "run_id": "e2e-20260627T222525Z"
+}

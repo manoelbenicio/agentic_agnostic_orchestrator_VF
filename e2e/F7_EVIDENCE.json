@@ -1,0 +1,162 @@
+{
+  "base_urls": {
+    "api": "http://127.0.0.1:8090",
+    "web": "http://127.0.0.1:13000"
+  },
+  "generated_at": "2026-06-27T22:27:55.053444+00:00",
+  "overall": "passed",
+  "profile": "full",
+  "results": [
+    {
+      "check_id": "f7.g1.health",
+      "detail": "health ok",
+      "duration_ms": 36,
+      "evidence": {
+        "payload": {
+          "coupling": {
+            "last_error": null,
+            "message_bus_error": null,
+            "message_bus_status": "connected",
+            "status": "connected"
+          },
+          "status": "ok"
+        }
+      },
+      "gate": "G1",
+      "name": "API health",
+      "status": "passed"
+    },
+    {
+      "check_id": "f7.g1.ready",
+      "detail": "ready",
+      "duration_ms": 9,
+      "evidence": {
+        "payload": {
+          "checks": {
+            "postgres": true,
+            "redis": true
+          },
+          "coupling": {
+            "last_error": null,
+            "message_bus_error": null,
+            "message_bus_status": "connected",
+            "status": "connected"
+          },
+          "status": "ready"
+        }
+      },
+      "gate": "G1",
+      "name": "API readiness",
+      "status": "passed"
+    },
+    {
+      "check_id": "f7.g1.metrics",
+      "detail": "metrics include control-plane liveness",
+      "duration_ms": 7,
+      "evidence": {},
+      "gate": "G1",
+      "name": "Metrics up",
+      "status": "passed"
+    },
+    {
+      "check_id": "f7.g3.ui_routes",
+      "detail": "12/12 routes passed",
+      "duration_ms": 1621,
+      "evidence": {
+        "routes": {
+          "/": {
+            "elapsed_ms": 162,
+            "status": 200
+          },
+          "/finops": {
+            "elapsed_ms": 116,
+            "status": 200
+          },
+          "/inbox": {
+            "elapsed_ms": 132,
+            "status": 200
+          },
+          "/issues": {
+            "elapsed_ms": 179,
+            "status": 200
+          },
+          "/live": {
+            "elapsed_ms": 116,
+            "status": 200
+          },
+          "/my-issues": {
+            "elapsed_ms": 131,
+            "status": 200
+          },
+          "/observability": {
+            "elapsed_ms": 124,
+            "status": 200
+          },
+          "/projects": {
+            "elapsed_ms": 178,
+            "status": 200
+          },
+          "/seats": {
+            "elapsed_ms": 120,
+            "status": 200
+          },
+          "/sessions": {
+            "elapsed_ms": 124,
+            "status": 200
+          },
+          "/settings": {
+            "elapsed_ms": 123,
+            "status": 200
+          },
+          "/squad-builder": {
+            "elapsed_ms": 107,
+            "status": 200
+          }
+        },
+        "skipped": []
+      },
+      "gate": "G3",
+      "name": "UI route smoke",
+      "status": "passed"
+    },
+    {
+      "check_id": "f7.g6.perf_smoke",
+      "detail": "p95 approx 8 ms over 6 samples",
+      "duration_ms": 34,
+      "evidence": {
+        "budget_ms": 1500,
+        "p95_ms": 8,
+        "samples_ms": [
+          6,
+          6,
+          8,
+          4,
+          4,
+          3
+        ]
+      },
+      "gate": "G6",
+      "name": "Perf smoke",
+      "status": "passed"
+    },
+    {
+      "check_id": "f7.g7.a11y_smoke",
+      "detail": "Playwright/axe runner not installed in AOP/e2e yet",
+      "duration_ms": 0,
+      "evidence": {},
+      "gate": "G7",
+      "name": "A11y smoke scaffold",
+      "status": "skipped"
+    },
+    {
+      "check_id": "f7.g4.critical_journey",
+      "detail": "Use test_contracts_wave1.py for current deep workflow coverage",
+      "duration_ms": 0,
+      "evidence": {},
+      "gate": "G4",
+      "name": "Critical journey scaffold",
+      "status": "skipped"
+    }
+  ],
+  "run_id": "f7-20260627T222755Z"
+}

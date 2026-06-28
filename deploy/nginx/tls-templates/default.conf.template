@@ -1,0 +1,54 @@
+server {
+    listen ${NGINX_PORT};
+    server_name ${AOP_DOMAIN} ${AOP_ADDITIONAL_DOMAINS};
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /usr/share/nginx/html;
+        default_type text/plain;
+    }
+
+    location / {
+        return 308 https://$host:${NGINX_SSL_PORT}$request_uri;
+    }
+}
+
+server {
+    listen ${NGINX_SSL_PORT} ssl;
+    http2 on;
+    server_name ${AOP_DOMAIN} ${AOP_ADDITIONAL_DOMAINS};
+
+    ssl_certificate ${NGINX_CERT_FILE};
+    ssl_certificate_key ${NGINX_CERT_KEY_FILE};
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:AOPSSL:10m;
+    ssl_session_timeout 1d;
+    ssl_prefer_server_ciphers off;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:${AOP_API_PORT}/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:${AOP_WEB_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+}

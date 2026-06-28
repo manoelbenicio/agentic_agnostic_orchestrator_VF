@@ -1,0 +1,595 @@
+{
+  "_comment": "Fonte de verdade das tarefas. O TL DEVE atualizar status/progress/eta_min a cada check-in/handoff (eta_min = minutos restantes estimados; progress = 0-100). status: pending|working|review|held|blocked|orphaned|done. priority: P0|P1|P2.",
+  "tasks": [
+    {
+      "id": "A",
+      "title": "Politica de portas +5 (resolve_port em common.sh, remover kill, start.sh)",
+      "priority": "P0",
+      "pane": "w3:pA",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "B",
+      "title": "Preparacao de ambiente (venv + npm install)",
+      "priority": "P0",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "C",
+      "title": "Portas observabilidade (Grafana/Prom/Alert/Blackbox/Remediation)",
+      "priority": "P1",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "D",
+      "title": "Segredos + auth (.env: POSTGRES_*/REDIS_PASSWORD, docs 13/14)",
+      "priority": "P1",
+      "pane": "w3:p6",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "E",
+      "title": "Execucao do deploy nas portas +5 (start.sh)",
+      "priority": "P0",
+      "pane": "w3:p8",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "F",
+      "title": "Docs 13/14/15 (Redis requirepass, REDIS_URL) + portas finais",
+      "priority": "P1",
+      "pane": "w3:p7",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "G",
+      "title": "Runbook preflight (docs/10-DEPLOY/16-RUNBOOK-PREFLIGHT.md)",
+      "priority": "P2",
+      "pane": "w3:p7",
+      "agent": "KIMCHI-GLM52",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "H",
+      "title": "TD6 - Corrigir Coupling control-plane <-> HerdMaster DEGRADED",
+      "priority": "P0",
+      "pane": "w3:p6",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "I",
+      "title": "TD4 - Robustez DB/pool: rollback em erro + pool check (psycopg)",
+      "priority": "P0",
+      "pane": "w3:p8",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "J",
+      "title": "TD1 - inbox_api backend + plugar UI /inbox",
+      "priority": "P1",
+      "pane": "w3:pA",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "K",
+      "title": "TD2 - /api/issues/my backend + plugar /my-issues",
+      "priority": "P1",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "L",
+      "title": "TD3 - settings_api backend + plugar /settings",
+      "priority": "P1",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "M",
+      "title": "TD5 - OTTL: trilha de tasks no Postgres + reconciliador",
+      "priority": "P1",
+      "pane": "w3:p7",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "N",
+      "title": "TD8 - Reconciliar OpenSpec <-> realidade",
+      "priority": "P1",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "O",
+      "title": "TD11 - squad_api backend",
+      "priority": "P2",
+      "pane": "w3:p6",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "P",
+      "title": "TD7 - Grafana: publicar porta 3000:3000",
+      "priority": "P2",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "Q",
+      "title": "TD9 - Integra\u00e7\u00e3o F1->F6",
+      "priority": "P2",
+      "pane": "w3:pA",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "R",
+      "title": "TD10 - QA E2E exaustivo",
+      "priority": "P3",
+      "pane": "w3:p8",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "S",
+      "title": "QA - Code Review & Refatora\u00e7\u00e3o Frontend (components)",
+      "priority": "P2",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "T",
+      "title": "QA - Testes Unit\u00e1rios de Backend (control-plane)",
+      "priority": "P2",
+      "pane": "w3:pA",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "U",
+      "title": "Seguran\u00e7a - Auditoria de endpoints e inje\u00e7\u00e3o SQL",
+      "priority": "P1",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "V",
+      "title": "Performance - Otimiza\u00e7\u00e3o de queries no PostgreSQL",
+      "priority": "P1",
+      "pane": "w3:p6",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "W",
+      "title": "QA - Automa\u00e7\u00e3o Playwright para Testes E2E Reais",
+      "priority": "P2",
+      "pane": "w3:p8",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "X",
+      "title": "Documenta\u00e7\u00e3o - Gera\u00e7\u00e3o do Swagger/OpenAPI final",
+      "priority": "P3",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "Y",
+      "title": "AI - Integrar modelo GLM-5.2 no Agent Runtime",
+      "priority": "P0",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "Z",
+      "title": "AI - Desenvolver UI de Chat Console no frontend",
+      "priority": "P1",
+      "pane": "w3:p2",
+      "agent": "KIMCHI-GLM52",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "AA",
+      "title": "AI - Implementar LLM Gateway Proxy no control-plane",
+      "priority": "P1",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "BB",
+      "title": "AI - Criar RAG Pipeline com Langchain/LlamaIndex",
+      "priority": "P0",
+      "pane": "w3:p6",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "CC",
+      "title": "AI - Testes unit\u00e1rios de gera\u00e7\u00e3o e context window",
+      "priority": "P2",
+      "pane": "w3:p8",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "DD",
+      "title": "AI - Subir Redis Vector Store no docker-compose",
+      "priority": "P1",
+      "pane": "w3:p7",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "EE",
+      "title": "OBS - Configura\u00e7\u00e3o do Prometheus",
+      "priority": "P0",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "FF",
+      "title": "OBS - Dashboards no Grafana",
+      "priority": "P1",
+      "pane": "w3:p2",
+      "agent": "KIMCHI-GLM52",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "GG",
+      "title": "OBS - Tracing Distribu\u00eddo OpenTelemetry",
+      "priority": "P0",
+      "pane": "w3:p7",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "HH",
+      "title": "OBS - Configura\u00e7\u00e3o de Alertas",
+      "priority": "P2",
+      "pane": "w3:p6",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "II",
+      "title": "PERF - Cache local Frontend",
+      "priority": "P1",
+      "pane": "w3:p7",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "JJ",
+      "title": "PERF - Stress testing com k6",
+      "priority": "P0",
+      "pane": "w3:p8",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "KK",
+      "title": "SEC - Auditoria SAST e Fixes",
+      "priority": "P0",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "LL",
+      "title": "SEC - Rate Limiting e WAF",
+      "priority": "P1",
+      "pane": "w3:pA",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "MM",
+      "title": "CI/CD - Pipeline GitHub Actions",
+      "priority": "P0",
+      "pane": "w3:p6",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "NN",
+      "title": "CI/CD - Registry e Rollback",
+      "priority": "P1",
+      "pane": "w3:p7",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "OO",
+      "title": "OPS - Backup Autom\u00e1tico Postgres",
+      "priority": "P2",
+      "pane": "w3:p8",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "PP",
+      "title": "SEC - PenTest Autom\u00e1tico (API)",
+      "priority": "P0",
+      "pane": "w3:p3",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "QQ",
+      "title": "PROD - Infraestrutura Global Multi-Regi\u00e3o K8s",
+      "priority": "P0",
+      "pane": "w3:p8",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "RR",
+      "title": "PROD - Otimiza\u00e7\u00e3o de Imagem Docker",
+      "priority": "P1",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "SS",
+      "title": "PROD - Infra CDN e Terraform",
+      "priority": "P0",
+      "pane": "w3:p6",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "TT",
+      "title": "PROD - Load Balancer Nginx",
+      "priority": "P1",
+      "pane": "w3:p7",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "UU",
+      "title": "PROD - Roteamento DNS e SSL",
+      "priority": "P0",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "VV",
+      "title": "DATA - Data Lake e Storage HDFS",
+      "priority": "P1",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "WW",
+      "title": "DATA - ETL Pipeline Batch",
+      "priority": "P0",
+      "pane": "w3:pA",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "XX",
+      "title": "DATA - BI Dashboard e Analytics",
+      "priority": "P2",
+      "pane": "w3:p3",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "YY",
+      "title": "DATA - ML Model Training Pipeline",
+      "priority": "P0",
+      "pane": "w3:pB",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "ZZ",
+      "title": "DATA - Machine Learning Model Optimization",
+      "priority": "P0",
+      "pane": "w3:p3",
+      "agent": "Gemini-PRO31",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "AAA",
+      "title": "DASHBOARD - Separar tarefas conclu\u00eddas visualmente em painel abaixo",
+      "priority": "P0",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "TD6",
+      "title": "TECH DEBT - Coupling control-plane<->HerdMaster DEGRADED",
+      "priority": "P0",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "TD8",
+      "title": "TECH DEBT - Reconciliar OpenSpec <-> realidade",
+      "priority": "P1",
+      "pane": "w3:p6",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "TD11",
+      "title": "TECH DEBT - squad_api backend (topologia)",
+      "priority": "P2",
+      "pane": "w3:p7",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "TD7",
+      "title": "TECH DEBT - Grafana docker-compose + dashboards",
+      "priority": "P2",
+      "pane": "w3:p8",
+      "agent": "codex",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "TD9",
+      "title": "TECH DEBT - Integra\u00e7\u00e3o F1->F6 app-shell",
+      "priority": "P2",
+      "pane": "w3:p3",
+      "agent": "agy",
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
+    },
+    {
+      "id": "TD10",
+      "title": "QA FINAL - E2E Exaustivo (Valida\u00e7\u00e3o Completa do Projeto)",
+      "priority": "P3",
+      "pane": "w3:p5",
+      "agent": "codex",
+      "status": "working",
+      "eta_min": 60,
+      "progress": 0
+    }
+  ]
+}

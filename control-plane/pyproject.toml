@@ -1,0 +1,88 @@
+[build-system]
+requires = ["setuptools==80.9.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aop-control-plane"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi==0.138.1",
+  "uvicorn==0.49.0",
+  "pydantic==2.13.4",
+  "psycopg[binary]==3.3.4",
+  "psycopg-pool==3.3.0",
+  "redis==8.0.1",
+  "websockets==15.0.1",
+  "prometheus-client==0.25.0",
+  "httpx==0.28.1",
+  "hdfs==2.7.3",
+  "opentelemetry-api==1.30.0",
+  "opentelemetry-sdk==1.30.0",
+  "opentelemetry-instrumentation-fastapi==0.51b0",
+  "opentelemetry-exporter-otlp==1.30.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==9.1.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+  "app*",
+  "ai_runtime*",
+  "core*",
+  "coupling*",
+  "data_lake*",
+  "executors*",
+  "finops*",
+  "inbox_api*",
+  "issues_api*",
+  "llm_gateway*",
+  "messaging*",
+  "orchestrator*",
+  "projects_api*",
+  "rag_pipeline*",
+  "registry*",
+  "rotation*",
+  "scheduler*",
+  "seats*",
+  "seats_api*",
+  "sessions_api*",
+  "settings_api*",
+  "squad_api*",
+  "tasks_api*",
+  "topology*",
+  "tracing*",
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+  "app/tests",
+  "ai_runtime/tests",
+  "core/tests",
+  "coupling/tests",
+  "data_lake/tests",
+  "executors/tests",
+  "finops/tests",
+  "inbox_api/tests",
+  "issues_api/tests",
+  "llm_gateway/tests",
+  "messaging/tests",
+  "orchestrator/tests",
+  "projects_api/tests",
+  "rag_pipeline/tests",
+  "registry/tests",
+  "rotation/tests",
+  "scheduler/tests",
+  "seats/tests",
+  "seats_api/tests",
+  "settings_api/tests",
+  "squad_api/tests",
+  "tasks_api/tests",
+  "topology/tests",
+  "tracing/tests",
+]
+norecursedirs = ["build", ".venv", "*.egg-info"]
