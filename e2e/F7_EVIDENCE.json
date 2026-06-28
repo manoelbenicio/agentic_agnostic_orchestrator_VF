@@ -3,14 +3,14 @@
     "api": "http://127.0.0.1:8090",
     "web": "http://127.0.0.1:13000"
   },
-  "generated_at": "2026-06-27T22:27:55.053444+00:00",
+  "generated_at": "2026-06-28T00:39:33.322487+00:00",
   "overall": "passed",
-  "profile": "full",
+  "profile": "smoke",
   "results": [
     {
       "check_id": "f7.g1.health",
       "detail": "health ok",
-      "duration_ms": 36,
+      "duration_ms": 124,
       "evidence": {
         "payload": {
           "coupling": {
@@ -29,7 +29,7 @@
     {
       "check_id": "f7.g1.ready",
       "detail": "ready",
-      "duration_ms": 9,
+      "duration_ms": 13,
       "evidence": {
         "payload": {
           "checks": {
@@ -52,7 +52,7 @@
     {
       "check_id": "f7.g1.metrics",
       "detail": "metrics include control-plane liveness",
-      "duration_ms": 7,
+      "duration_ms": 26,
       "evidence": {},
       "gate": "G1",
       "name": "Metrics up",
@@ -61,55 +61,55 @@
     {
       "check_id": "f7.g3.ui_routes",
       "detail": "12/12 routes passed",
-      "duration_ms": 1621,
+      "duration_ms": 2007,
       "evidence": {
         "routes": {
           "/": {
-            "elapsed_ms": 162,
+            "elapsed_ms": 113,
             "status": 200
           },
           "/finops": {
-            "elapsed_ms": 116,
+            "elapsed_ms": 113,
             "status": 200
           },
           "/inbox": {
-            "elapsed_ms": 132,
+            "elapsed_ms": 276,
             "status": 200
           },
           "/issues": {
-            "elapsed_ms": 179,
+            "elapsed_ms": 155,
             "status": 200
           },
           "/live": {
-            "elapsed_ms": 116,
+            "elapsed_ms": 126,
             "status": 200
           },
           "/my-issues": {
-            "elapsed_ms": 131,
+            "elapsed_ms": 223,
             "status": 200
           },
           "/observability": {
-            "elapsed_ms": 124,
+            "elapsed_ms": 222,
             "status": 200
           },
           "/projects": {
-            "elapsed_ms": 178,
+            "elapsed_ms": 186,
             "status": 200
           },
           "/seats": {
-            "elapsed_ms": 120,
+            "elapsed_ms": 104,
             "status": 200
           },
           "/sessions": {
-            "elapsed_ms": 124,
+            "elapsed_ms": 117,
             "status": 200
           },
           "/settings": {
-            "elapsed_ms": 123,
+            "elapsed_ms": 208,
             "status": 200
           },
           "/squad-builder": {
-            "elapsed_ms": 107,
+            "elapsed_ms": 155,
             "status": 200
           }
         },
@@ -118,45 +118,7 @@
       "gate": "G3",
       "name": "UI route smoke",
       "status": "passed"
-    },
-    {
-      "check_id": "f7.g6.perf_smoke",
-      "detail": "p95 approx 8 ms over 6 samples",
-      "duration_ms": 34,
-      "evidence": {
-        "budget_ms": 1500,
-        "p95_ms": 8,
-        "samples_ms": [
-          6,
-          6,
-          8,
-          4,
-          4,
-          3
-        ]
-      },
-      "gate": "G6",
-      "name": "Perf smoke",
-      "status": "passed"
-    },
-    {
-      "check_id": "f7.g7.a11y_smoke",
-      "detail": "Playwright/axe runner not installed in AOP/e2e yet",
-      "duration_ms": 0,
-      "evidence": {},
-      "gate": "G7",
-      "name": "A11y smoke scaffold",
-      "status": "skipped"
-    },
-    {
-      "check_id": "f7.g4.critical_journey",
-      "detail": "Use test_contracts_wave1.py for current deep workflow coverage",
-      "duration_ms": 0,
-      "evidence": {},
-      "gate": "G4",
-      "name": "Critical journey scaffold",
-      "status": "skipped"
     }
   ],
-  "run_id": "f7-20260627T222755Z"
+  "run_id": "f7-20260628T003933Z"
 }

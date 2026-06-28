@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any, Callable, Literal
 
+import psycopg
 from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -93,19 +94,22 @@ def build_issues_router(
         metadata = dict(request.metadata)
         if x_agent_id and not metadata.get("created_by"):
             metadata["created_by"] = x_agent_id
-        issue = repo.create(
-            issue_id=request.issue_id,
-            tenant_id=request.tenant_id,
-            project_id=request.project_id,
-            title=request.title,
-            description=request.description,
-            status=request.status,
-            priority=request.priority,
-            assignee_runtime=request.assignee_runtime,
-            operation_mode=request.operation_mode.value,
-            due_date=request.due_date,
-            metadata=metadata,
-        )
+        try:
+            issue = repo.create(
+                issue_id=request.issue_id,
+                tenant_id=request.tenant_id,
+                project_id=request.project_id,
+                title=request.title,
+                description=request.description,
+                status=request.status,
+                priority=request.priority,
+                assignee_runtime=request.assignee_runtime,
+                operation_mode=request.operation_mode.value,
+                due_date=request.due_date,
+                metadata=metadata,
+            )
+        except psycopg.errors.UniqueViolation as exc:
+            raise HTTPException(status_code=409, detail="issue already exists") from exc
         return _issue(issue)
 
     @router.get("", response_model=list[IssueResponse])

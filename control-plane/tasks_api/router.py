@@ -11,9 +11,11 @@ Exposes:
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
+from urllib import error, parse, request
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, ConfigDict, Field
@@ -123,38 +125,64 @@ def build_tasks_router(
     ) -> dict[str, Any]:
         """Proxy: list tasks directly from HerdMaster's live API.
 
-        Requires the message bus (HerdMasterAuthClient) to be connected.
+        Uses HerdMaster's REST API so this endpoint remains a read-only proxy
+        instead of submitting a claim/dispatch operation through the message bus.
         """
-        hm_client = getattr(state, "message_bus", None)
-        if hm_client is None:
+        settings = getattr(state, "settings", None)
+        token = getattr(settings, "herdmaster_token", None)
+        base_url = getattr(settings, "herdmaster_url", None)
+        if not token or not base_url:
             raise HTTPException(
                 status_code=503,
                 detail={
                     "code": "herdmaster_unavailable",
-                    "reason": "HerdMaster message bus is not connected",
+                    "reason": "HerdMaster REST credentials are not configured",
                 },
             )
-        from core import OperationMode, TaskBudget, TaskEnvelope
 
-        # Build a minimal envelope for the claim/list interface
-        envelope = TaskEnvelope(
-            task_id="probe",
-            tenant_id="probe",
-            project_id=project_id or "probe",
-            assignee_runtime=assigned_to or "probe",
-            prompt="",
-            credential_ref="seat://local",
-            operation_mode=OperationMode.SOCKET,
-            budget=TaskBudget(),
+        query = parse.urlencode(
+            {
+                key: value
+                for key, value in {
+                    "assigned_to": assigned_to,
+                    "project_id": project_id,
+                }.items()
+                if value
+            }
+        )
+        url = f"{str(base_url).rstrip('/')}/tasks"
+        if query:
+            url = f"{url}?{query}"
+
+        herdmaster_request = request.Request(
+            url,
+            headers={
+                "Accept": "application/json",
+                "Authorization": f"Bearer {token}",
+            },
+            method="GET",
         )
         try:
-            result = await hm_client.claim(envelope)
-        except RuntimeError as exc:
+            with request.urlopen(herdmaster_request, timeout=5) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "code": "herdmaster_error",
+                    "status": exc.code,
+                    "reason": body or exc.reason,
+                },
+            ) from exc
+        except (OSError, json.JSONDecodeError) as exc:
             raise HTTPException(
                 status_code=502,
                 detail={"code": "herdmaster_error", "reason": str(exc)},
             ) from exc
-        return {"ok": True, "tasks": result}
+
+        tasks = payload.get("data", payload) if isinstance(payload, dict) else payload
+        return {"ok": True, "tasks": tasks}
 
     @router.get("/{task_id}", response_model=TaskResponse)
     def get_task(task_id: str, repo: Any = Depends(repository)) -> TaskResponse:

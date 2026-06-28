@@ -5,7 +5,9 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from tracing.models import TraceLayer, TraceSignalType
 
 
 OperationModeText = Literal["terminal", "socket"]
@@ -77,8 +79,8 @@ class SeatCostRequest(BaseModel):
 
 class TraceEventRequest(BaseModel):
     trace_id: str
-    layer: str
-    signal_type: str
+    layer: TraceLayer
+    signal_type: TraceSignalType
     tenant_id: str
     project_id: str
     issue_id: str
@@ -88,6 +90,27 @@ class TraceEventRequest(BaseModel):
     token_burn: int = 0
     seat_seconds: int = 0
     details: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("layer", mode="before")
+    @classmethod
+    def normalize_layer(cls, value: Any) -> Any:
+        aliases = {
+            "product": TraceLayer.L4_PRODUCT,
+            "orchestration": TraceLayer.L3_ORCHESTRATION,
+            "control_plane": TraceLayer.L2_CONTROL_PLANE,
+            "control-plane": TraceLayer.L2_CONTROL_PLANE,
+            "execution": TraceLayer.L1_EXECUTION,
+        }
+        return aliases.get(value, value)
+
+    @field_validator("signal_type", mode="before")
+    @classmethod
+    def normalize_signal_type(cls, value: Any) -> Any:
+        aliases = {
+            "log": TraceSignalType.AUDIT,
+            "trace": TraceSignalType.LIFECYCLE,
+        }
+        return aliases.get(value, value)
 
 
 class TraceArtifactRequest(BaseModel):

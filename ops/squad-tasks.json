@@ -587,9 +587,9 @@
       "priority": "P3",
       "pane": "w3:p5",
       "agent": "codex",
-      "status": "working",
-      "eta_min": 60,
-      "progress": 0
+      "status": "done",
+      "eta_min": 0,
+      "progress": 100
     }
   ]
 }
