@@ -1,0 +1,38 @@
+groups:
+  - name: aop_rules
+    rules:
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'High HTTP error rate on {{ .job }}'
+          description: 'Error rate is over 5% (currently {{  | humanizePercentage }}) on job {{ .job }}.'
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High request latency on {{ .job }}'
+          description: '95th percentile request latency is over 2 seconds (currently {{  }}s) on job {{ .job }}.'
+
+      - alert: AdapterDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Target {{ .instance }} is down'
+          description: 'Scrape target {{ .instance }} of job {{ .job }} has been down for more than 5 minutes.'
+
+      - alert: BudgetExceeded
+        expr: aop_budget_exceeded == 1 or (aop_budget_spent_dollars > aop_budget_limit_dollars)
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'AOP billing budget exceeded'
+          description: 'The AOP platform has exceeded its configured budget limit.'
