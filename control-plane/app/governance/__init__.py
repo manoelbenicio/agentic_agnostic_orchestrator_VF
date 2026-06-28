@@ -23,6 +23,7 @@ from .audit_trail import (
 )
 from .cost_allocation import (
     BudgetAlert,
+    BudgetThreshold,
     CostAggregator,
     CostBucket,
     CostEvent,
@@ -33,6 +34,7 @@ from .rbac import (
     PermissionDeniedError,
     PolicyEngine,
     PolicyRule,
+    ROLE_PERMISSIONS,
     Role,
     User,
     enforce_permission,
@@ -43,6 +45,7 @@ __all__ = [
     # RBAC
     "Role",
     "Permission",
+    "ROLE_PERMISSIONS",
     "User",
     "PolicyEngine",
     "PolicyRule",
@@ -61,5 +64,6 @@ __all__ = [
     "CostAggregator",
     "CostBucket",
     "BudgetAlert",
+    "BudgetThreshold",
     "build_governance_costs_router",
 ]
