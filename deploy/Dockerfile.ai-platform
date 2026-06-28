@@ -1,0 +1,68 @@
+# ==============================================================================
+# Phase 1: Heavy Compilation Builder Stage
+# ==============================================================================
+FROM python:3.11-slim as builder
+
+# Inject critical C-compilation dependencies (required for Postgres asyncpg / C-extensions)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Bootstrap standard Poetry installation binaries
+ENV POETRY_VERSION=1.8.2
+RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV PATH="/root/.local/bin:$PATH"
+
+WORKDIR /build
+
+# Copy architecture locks specifically decoupling logic to utilize Docker Layer Caching natively
+COPY pyproject.toml poetry.lock* ./
+
+# Configure Poetry to lock standard virtual environments physically inside the directory array
+RUN poetry config virtualenvs.in-project true
+
+# Install absolute production dependencies rigorously excluding dev/test arrays (pytest, ruff, etc.)
+RUN poetry install --only main --no-interaction --no-ansi --no-root
+
+
+# ==============================================================================
+# Phase 2: Lightweight Secured Runtime Environment
+# ==============================================================================
+FROM python:3.11-slim as runtime
+
+# Architectural environment constraints ensuring clean container streaming
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/app/.venv/bin:$PATH"
+
+# Establish rigid non-root unprivileged IAM constraints natively
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Only inject exact runtime physical binaries required
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Physically migrate the dense compiled Virtual Environment from the Builder Phase
+COPY --from=builder --chown=appuser:appuser /build/.venv /app/.venv
+
+# Map operational module logic transferring ownership natively
+COPY --chown=appuser:appuser ./agnostic-ai-platform /app
+
+# Strip root privileges permanently dropping into standard User execution context
+USER appuser
+
+# Declare exposed TCP networking geometry
+EXPOSE 8001
+
+# Deep internal health probe bounding execution liveness metrics cleanly to Docker Daemon/K8s
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+# Native Execution Loop leveraging Uvicorn ASGI architectures natively
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "2"]
