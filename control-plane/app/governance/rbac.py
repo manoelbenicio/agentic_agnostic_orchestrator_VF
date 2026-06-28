@@ -352,7 +352,10 @@ class PolicyEngine:
     """
 
     def __init__(self, audit_trail: AuditTrail | None = None) -> None:
-        self._audit_trail: AuditTrail = audit_trail or get_default_trail()
+        # NOTE: use `is not None` rather than `or` — an empty AuditTrail is
+        # falsy via its `__len__`, which would cause `or` to discard the
+        # caller-supplied trail and fall back to the default singleton.
+        self._audit_trail: AuditTrail = audit_trail if audit_trail is not None else get_default_trail()
         self._rules: list[PolicyRule] = []
         self._lock = threading.RLock()
 
